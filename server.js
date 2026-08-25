@@ -74,17 +74,30 @@ function saveOrders(orders) {
     }
 }
 
+// ONAYLANAN SİPARİŞİ OTOMATİK "KART PROFİLLERİ"NE AKTARAN YARDIMCI
+function activateOrderProfile(order) {
+    if (!order || !order.draftProfile) return false;
+
+    const profiles = getProfiles();
+    if (!profiles.some(p => p.id === order.draftProfile.id)) {
+        profiles.push(order.draftProfile);
+        saveProfiles(profiles);
+        console.log(`✅ PROFİL AKTİF EDİLDİ: ${order.draftProfile.name} -> Kart Profillerine Eklendi!`);
+        return true;
+    }
+    return false;
+}
+
 // TELEGRAM BOT ANLIK CEP BİLDİRİMİ VE ONAY BUTONU GÖNDERİCİ
 async function sendTelegramNotification(order) {
     const qty = order.quantity || 1;
     const price = order.totalPrice || order.price || '1.000 TL';
-    const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 NFC KART SİPARİŞİ (${qty} ADET)\n\nSipariş No: ${order.id}\nAdet: ${qty} Adet\nToplam Tutar: ${price}\nÖdeme Yöntemi: ${order.paymentMethod || 'IBAN Havale/EFT'}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}\n\nDurum: Bekliyor (Ödeme Onayı Gerekli)`;
+    const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 NFC KART SİPARİŞİ (${qty} ADET)\n\nSipariş No: ${order.id}\nAdet: ${qty} Adet\nToplam Tutar: ${price}\nÖdeme Yöntemi: ${order.paymentMethod || 'IBAN Havale/EFT'}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}\n\nDurum: Bekliyor (Ödeme Onayı Bekleniyor)`;
 
-    // Telegram Inline Action Button (Ödemeyi Onayla / İptal Et)
     const replyMarkup = JSON.stringify({
         inline_keyboard: [
             [
-                { text: '✅ ÖDEMEYİ ONAYLA', callback_data: `approve_${order.id}` },
+                { text: '✅ ÖDEMEYİ ONAYLA & PROFİLE AKTAR', callback_data: `approve_${order.id}` },
                 { text: '❌ İPTAL ET', callback_data: `cancel_${order.id}` }
             ]
         ]
@@ -178,7 +191,11 @@ function pollTelegramCommands() {
                                 if (order) {
                                     order.status = 'Ödeme Alındı / Onaylandı';
                                     saveOrders(orders);
-                                    sendTelegramMessage(chatId, `🎉 BİLDİRİM: ${orderId} kodlu ${order.customerName} siparişinin ödemesi ONAYLANDI! Kart basılabilir.`);
+                                    
+                                    // SİPARİŞİ KART PROFİLLERİNE EKLENEN KISIM
+                                    activateOrderProfile(order);
+
+                                    sendTelegramMessage(chatId, `🎉 BİLDİRİM: ${orderId} kodlu ${order.customerName} siparişinin ödemesi ONAYLANDI! Profil otomatik olarak "Kart Profilleri" sekmesine eklendi.`);
                                 }
                             } else if (callbackData.startsWith('cancel_')) {
                                 const orderId = callbackData.replace('cancel_', '');
@@ -196,11 +213,15 @@ function pollTelegramCommands() {
                             const cleanText = text.toLowerCase();
                             if (cleanText.includes('onay') || cleanText.includes('onayla')) {
                                 const orders = getOrders();
-                                const pendingOrder = orders.find(o => o.status === 'Bekliyor');
+                                const pendingOrder = orders.find(o => o.status.includes('Bekliyor'));
                                 if (pendingOrder) {
                                     pendingOrder.status = 'Ödeme Alındı / Onaylandı';
                                     saveOrders(orders);
-                                    sendTelegramMessage(chatId, `🎉 TEBRİKLER! En son bekleyen sipariş (${pendingOrder.id} - ${pendingOrder.customerName}) ONAYLANDI! Kart basıma hazırdır.`);
+
+                                    // PROFİLE AKTAR
+                                    activateOrderProfile(pendingOrder);
+
+                                    sendTelegramMessage(chatId, `🎉 TEBRİKLER! ${pendingOrder.id} (${pendingOrder.customerName}) siparişi ONAYLANDI ve "Kart Profilleri" sekmesine eklendi!`);
                                 } else {
                                     sendTelegramMessage(chatId, `ℹ️ Şunu an bildirimlerde bekleyen onaylanmamış yeni sipariş bulunmuyor.`);
                                 }
@@ -213,7 +234,6 @@ function pollTelegramCommands() {
     }).on('error', () => {});
 }
 
-// Telegram Mesaj Gönderme Yardımcısı
 function sendTelegramMessage(chatId, text) {
     const postData = JSON.stringify({ chat_id: chatId, text });
     const req = https.request({
@@ -226,7 +246,6 @@ function sendTelegramMessage(chatId, text) {
     req.end();
 }
 
-// Periyodik Telegram Dinleyici (Her 5 saniyede bir Telegram'daki 'ONAY' komutlarını kontrol et)
 setInterval(pollTelegramCommands, 5000);
 
 function sendOrderNotification(order) {
@@ -274,7 +293,7 @@ app.post('/api/orders', (req, res) => {
 
     let finalId = id;
     let counter = 1;
-    while (profiles.some(p => p.id === finalId)) {
+    while (profiles.some(p => p.id === finalId) || getOrders().some(o => o.draftProfile && o.draftProfile.id === finalId)) {
         finalId = `${id}-${counter}`;
         counter++;
     }
@@ -297,7 +316,7 @@ app.post('/api/orders', (req, res) => {
         ibans.push({ bank: 'Banka Hesabı', name, iban });
     }
 
-    const newProfile = {
+    const draftProfile = {
         id: finalId,
         name,
         title: title || 'Müşteri',
@@ -314,10 +333,7 @@ app.post('/api/orders', (req, res) => {
         createdAt: new Date().toISOString()
     };
 
-    profiles.push(newProfile);
-    saveProfiles(profiles);
-
-    // Save Order
+    // Save Order (Draft Profile ile birlikte)
     const orders = getOrders();
     const qty = parseInt(req.body.quantity) || 1;
     const totalPriceCalc = req.body.totalPrice || req.body.price || `${(qty * 1000).toLocaleString('tr-TR')} TL`;
@@ -325,6 +341,7 @@ app.post('/api/orders', (req, res) => {
     const newOrder = {
         id: `siparis-${Date.now().toString().slice(-4)}`,
         customerName: name,
+        company: company || '',
         customerPhone: phone,
         customerEmail: email || '',
         quantity: qty,
@@ -338,6 +355,7 @@ app.post('/api/orders', (req, res) => {
         cardColor: cardColor || 'Gümüş Metal',
         profileId: finalId,
         profileName: name,
+        draftProfile: draftProfile,
         status: 'Bekliyor (Ödeme Onayı Bekleniyor)',
         createdAt: new Date().toISOString()
     };
@@ -361,7 +379,7 @@ app.get('/api/orders', requireAdminAuth, (req, res) => {
     res.json(getOrders());
 });
 
-// API: Sipariş Durumu Güncelle (Tamamlandı / Kargolandı)
+// API: Sipariş Durumu Güncelle (Tamamlandı / Onaylandı)
 app.put('/api/orders/:id/status', requireAdminAuth, (req, res) => {
     let orders = getOrders();
     const order = orders.find(o => o.id === req.params.id);
@@ -369,8 +387,12 @@ app.put('/api/orders/:id/status', requireAdminAuth, (req, res) => {
 
     order.status = req.body.status || 'Tamamlandı / Kargolandı';
     order.completedAt = new Date().toISOString();
+
+    // Sipariş onaylandığında Kart Profillerine Otomatik Aktar!
+    activateOrderProfile(order);
+
     saveOrders(orders);
-    res.json({ success: true, message: 'Sipariş durumu güncellendi', order });
+    res.json({ success: true, message: 'Sipariş onaylandı ve Kart Profillerine eklendi', order });
 });
 
 // API: Sipariş Sil (Admin Şifre Korumalı)
@@ -496,6 +518,6 @@ app.listen(PORT, () => {
     console.log(`====================================================`);
     console.log(`🚀 NFC KART Sunucusu Çalışıyor!`);
     console.log(`🔑 Admin Şifresi: ${ADMIN_PASSWORD}`);
-    console.log(`🤖 Telegram Bot Onay Dinleyicisi Aktif!`);
+    console.log(`⚡ Sipariş Onayında Otomatik Kart Profili Oluşturma Aktif!`);
     console.log(`====================================================`);
 });
