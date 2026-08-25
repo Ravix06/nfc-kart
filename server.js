@@ -13,10 +13,10 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Ruken.12';
 // Telegram Bot Entegrasyonu (@nfc_kart_siparis_bot)
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8768331983:AAHqiStLE65fI1yYRuqZR_92Bob2oLhZZ0A';
 let cachedChatIds = new Set();
+let lastTelegramUpdateId = 0;
 
 // Bildirim Telefon Numarası
 const NOTIFY_PHONE = '05078405206';
-const CLEAN_NOTIFY_PHONE = '905078405206';
 
 app.use(cors());
 app.use(express.json());
@@ -74,15 +74,24 @@ function saveOrders(orders) {
     }
 }
 
-// TELEGRAM BOT ANLIK CEP BİLDİRİMİ GÖNDERİCİ
+// TELEGRAM BOT ANLIK CEP BİLDİRİMİ VE ONAY BUTONU GÖNDERİCİ
 async function sendTelegramNotification(order) {
     const qty = order.quantity || 1;
     const price = order.totalPrice || order.price || '1.000 TL';
-    const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 NFC KART SİPARİŞİ (${qty} ADET)\n\nSipariş No: ${order.id}\nAdet: ${qty} Adet\nToplam Tutar: ${price}\nÖdeme Yöntemi: ${order.paymentMethod || 'IBAN Havale/EFT'}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}`;
+    const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 NFC KART SİPARİŞİ (${qty} ADET)\n\nSipariş No: ${order.id}\nAdet: ${qty} Adet\nToplam Tutar: ${price}\nÖdeme Yöntemi: ${order.paymentMethod || 'IBAN Havale/EFT'}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}\n\nDurum: Bekliyor (Ödeme Onayı Gerekli)`;
+
+    // Telegram Inline Action Button (Ödemeyi Onayla / İptal Et)
+    const replyMarkup = JSON.stringify({
+        inline_keyboard: [
+            [
+                { text: '✅ ÖDEMEYİ ONAYLA', callback_data: `approve_${order.id}` },
+                { text: '❌ İPTAL ET', callback_data: `cancel_${order.id}` }
+            ]
+        ]
+    });
 
     try {
-        // Fetch Chat IDs from Telegram Updates
-        const updateUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates`;
+        const updateUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?offset=${lastTelegramUpdateId + 1}`;
         https.get(updateUrl, (res) => {
             let body = '';
             res.on('data', chunk => body += chunk);
@@ -91,23 +100,34 @@ async function sendTelegramNotification(order) {
                     const data = JSON.parse(body);
                     if (data.ok && Array.isArray(data.result)) {
                         data.result.forEach(upd => {
+                            if (upd.update_id >= lastTelegramUpdateId) {
+                                lastTelegramUpdateId = upd.update_id + 1;
+                            }
                             if (upd.message && upd.message.chat && upd.message.chat.id) {
                                 cachedChatIds.add(upd.message.chat.id);
                             }
                         });
                     }
 
-                    // Broadcast Telegram Message to all registered Chat IDs
                     if (cachedChatIds.size > 0) {
                         cachedChatIds.forEach(chatId => {
-                            const tgText = encodeURIComponent(notifyMsg);
-                            const sendUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${chatId}&text=${tgText}`;
-                            https.get(sendUrl, (sRes) => {
-                                console.log(`✅ Telegram Bildirimi Telefonunuza Gönderildi (Chat ID: ${chatId})`);
+                            const postData = JSON.stringify({
+                                chat_id: chatId,
+                                text: notifyMsg,
+                                reply_markup: JSON.parse(replyMarkup)
                             });
+
+                            const req = https.request({
+                                hostname: 'api.telegram.org',
+                                path: `/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' }
+                            }, (sRes) => {
+                                console.log(`✅ Telegram Sipariş ve Onay Butonu Gönderildi (Chat ID: ${chatId})`);
+                            });
+                            req.write(postData);
+                            req.end();
                         });
-                    } else {
-                        console.log("⚠️ Telegram Bot henüz chat ID almadı. Lütfen t.me/nfc_kart_siparis_bot adresine girip BAŞLAT butonuna basın.");
                     }
                 } catch (e) {
                     console.error("Telegram parse error:", e);
@@ -120,13 +140,101 @@ async function sendTelegramNotification(order) {
     }
 }
 
+// TELEGRAM BOT POLLING (ONAY BUTONU VE 'ONAY' MESAJI DİNLEYİCİ)
+function pollTelegramCommands() {
+    const pollUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?offset=${lastTelegramUpdateId + 1}`;
+    https.get(pollUrl, (res) => {
+        let body = '';
+        res.on('data', chunk => body += chunk);
+        res.on('end', () => {
+            try {
+                const data = JSON.parse(body);
+                if (data.ok && Array.isArray(data.result)) {
+                    data.result.forEach(upd => {
+                        if (upd.update_id >= lastTelegramUpdateId) {
+                            lastTelegramUpdateId = upd.update_id + 1;
+                        }
+
+                        let chatId = null;
+                        let text = '';
+                        let callbackData = null;
+
+                        if (upd.callback_query) {
+                            chatId = upd.callback_query.message.chat.id;
+                            callbackData = upd.callback_query.data;
+                        } else if (upd.message) {
+                            chatId = upd.message.chat.id;
+                            text = (upd.message.text || '').trim();
+                        }
+
+                        if (chatId) cachedChatIds.add(chatId);
+
+                        // 1. TELEGRAM INLINE BUTON TIKLANDIĞINDA
+                        if (callbackData) {
+                            const orders = getOrders();
+                            if (callbackData.startsWith('approve_')) {
+                                const orderId = callbackData.replace('approve_', '');
+                                const order = orders.find(o => o.id === orderId);
+                                if (order) {
+                                    order.status = 'Ödeme Alındı / Onaylandı';
+                                    saveOrders(orders);
+                                    sendTelegramMessage(chatId, `🎉 BİLDİRİM: ${orderId} kodlu ${order.customerName} siparişinin ödemesi ONAYLANDI! Kart basılabilir.`);
+                                }
+                            } else if (callbackData.startsWith('cancel_')) {
+                                const orderId = callbackData.replace('cancel_', '');
+                                const order = orders.find(o => o.id === orderId);
+                                if (order) {
+                                    order.status = 'İptal Edildi';
+                                    saveOrders(orders);
+                                    sendTelegramMessage(chatId, `❌ BİLDİRİM: ${orderId} kodlu sipariş İptal edildi.`);
+                                }
+                            }
+                        }
+
+                        // 2. KULLANICI 'ONAY' VEYA '/ONAY' YAZDIĞINDA
+                        if (text) {
+                            const cleanText = text.toLowerCase();
+                            if (cleanText.includes('onay') || cleanText.includes('onayla')) {
+                                const orders = getOrders();
+                                const pendingOrder = orders.find(o => o.status === 'Bekliyor');
+                                if (pendingOrder) {
+                                    pendingOrder.status = 'Ödeme Alındı / Onaylandı';
+                                    saveOrders(orders);
+                                    sendTelegramMessage(chatId, `🎉 TEBRİKLER! En son bekleyen sipariş (${pendingOrder.id} - ${pendingOrder.customerName}) ONAYLANDI! Kart basıma hazırdır.`);
+                                } else {
+                                    sendTelegramMessage(chatId, `ℹ️ Şunu an bildirimlerde bekleyen onaylanmamış yeni sipariş bulunmuyor.`);
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (e) {}
+        });
+    }).on('error', () => {});
+}
+
+// Telegram Mesaj Gönderme Yardımcısı
+function sendTelegramMessage(chatId, text) {
+    const postData = JSON.stringify({ chat_id: chatId, text });
+    const req = https.request({
+        hostname: 'api.telegram.org',
+        path: `/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    });
+    req.write(postData);
+    req.end();
+}
+
+// Periyodik Telegram Dinleyici (Her 5 saniyede bir Telegram'daki 'ONAY' komutlarını kontrol et)
+setInterval(pollTelegramCommands, 5000);
+
 function sendOrderNotification(order) {
     console.log(`\n====================================================`);
     console.log(`🚨 SİPARİŞİNİZ GELDİ!!! -> ${NOTIFY_PHONE}`);
     console.log(`Müşteri: ${order.customerName} - Tel: ${order.customerPhone}`);
     console.log(`====================================================\n`);
 
-    // Telegram Bot Bildirimi Tetikle
     sendTelegramNotification(order);
 }
 
@@ -230,7 +338,7 @@ app.post('/api/orders', (req, res) => {
         cardColor: cardColor || 'Gümüş Metal',
         profileId: finalId,
         profileName: name,
-        status: 'Bekliyor',
+        status: 'Bekliyor (Ödeme Onayı Bekleniyor)',
         createdAt: new Date().toISOString()
     };
 
@@ -253,14 +361,26 @@ app.get('/api/orders', requireAdminAuth, (req, res) => {
     res.json(getOrders());
 });
 
-// API: Sipariş Sil / Tamamla
+// API: Sipariş Durumu Güncelle (Tamamlandı / Kargolandı)
+app.put('/api/orders/:id/status', requireAdminAuth, (req, res) => {
+    let orders = getOrders();
+    const order = orders.find(o => o.id === req.params.id);
+    if (!order) return res.status(404).json({ error: 'Sipariş bulunamadı' });
+
+    order.status = req.body.status || 'Tamamlandı / Kargolandı';
+    order.completedAt = new Date().toISOString();
+    saveOrders(orders);
+    res.json({ success: true, message: 'Sipariş durumu güncellendi', order });
+});
+
+// API: Sipariş Sil (Admin Şifre Korumalı)
 app.delete('/api/orders/:id', requireAdminAuth, (req, res) => {
     let orders = getOrders();
     const initialLen = orders.length;
     orders = orders.filter(o => o.id !== req.params.id);
     if (orders.length === initialLen) return res.status(404).json({ error: 'Sipariş bulunamadı' });
     saveOrders(orders);
-    res.json({ success: true, message: 'Sipariş tamamlandı' });
+    res.json({ success: true, message: 'Sipariş arşivden silindi' });
 });
 
 // API: Profiles REST CRUD
@@ -376,6 +496,6 @@ app.listen(PORT, () => {
     console.log(`====================================================`);
     console.log(`🚀 NFC KART Sunucusu Çalışıyor!`);
     console.log(`🔑 Admin Şifresi: ${ADMIN_PASSWORD}`);
-    console.log(`🤖 Telegram Bot Bildirici (@nfc_kart_siparis_bot) Aktif!`);
+    console.log(`🤖 Telegram Bot Onay Dinleyicisi Aktif!`);
     console.log(`====================================================`);
 });
