@@ -296,9 +296,9 @@
                 <i class="fa-solid fa-circle-check animate-bounce"></i>
             </div>
             
-            <h3 class="text-xl font-black text-white">2. Siparişiniz Alındı! 🎉</h3>
-            <p class="text-xs text-slate-300 leading-relaxed">
-                Ödemeniz teyit edildikten sonra Gümüş Metal NFC Kartınız basılıp kargolanacaktır.
+            <h3 id="modal-title-text" class="text-xl font-black text-white">Ödeme Bekleniyor ⏳</h3>
+            <p id="modal-subtitle-text" class="text-xs text-slate-300 leading-relaxed">
+                Lütfen ödemenizi yukarıdaki IBAN hesabına gerçekleştiriniz. Ödemeniz teyit edildikten sonra siparişiniz onaylanacak ve kargonuz hazırlanacaktır.
             </p>
 
             <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 text-left space-y-1.5">
@@ -404,6 +404,21 @@
                 document.getElementById('success-profile-link').href = profileUrl;
                 document.getElementById('success-profile-link').innerText = profileUrl;
                 document.getElementById('btn-view-profile').href = profileUrl;
+                document.getElementById('modal-total-badge').innerText = totalPriceStr;
+
+                const ibanBox = document.getElementById('iban-info-box');
+                const modalTitle = document.getElementById('modal-title-text');
+                const modalSubtitle = document.getElementById('modal-subtitle-text');
+
+                if (payload.paymentMethod.includes('Kapıda')) {
+                    ibanBox.classList.add('hidden');
+                    modalTitle.innerText = 'Siparişiniz Alındı! 🎉';
+                    modalSubtitle.innerText = 'Kapıda ödeme siparişiniz başarıyla alındı. Gümüş Metal NFC Kartınız hazırlanıp kargoya verilecektir.';
+                } else {
+                    ibanBox.classList.remove('hidden');
+                    modalTitle.innerText = 'Ödeme Bekleniyor ⏳';
+                    modalSubtitle.innerText = `Lütfen ${totalPriceStr} ödemenizi yukarıdaki IBAN hesabına gerçekleştiriniz. Ödemeniz teyit edildikten sonra siparişiniz onaylanacak ve kargonuz hazırlanacaktır.`;
+                }
 
                 document.getElementById('success-modal').classList.remove('hidden');
 
