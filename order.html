@@ -418,6 +418,9 @@
                     ibanBox.classList.remove('hidden');
                     modalTitle.innerText = 'Ödeme Bekleniyor ⏳';
                     modalSubtitle.innerText = `Lütfen ${totalPriceStr} ödemenizi yukarıdaki IBAN hesabına gerçekleştiriniz. Ödemeniz teyit edildikten sonra siparişiniz onaylanacak ve kargonuz hazırlanacaktır.`;
+                    
+                    // CANLI ONAY KONTROLÜ BAŞLAT (Her 3 saniyede bir Telegram Onayını kontrol et!)
+                    startLiveApprovalCheck(data.profileId);
                 }
 
                 document.getElementById('success-modal').classList.remove('hidden');
@@ -426,6 +429,35 @@
                 console.error("Order submit error:", err);
                 showToast("Sunucu hatası!", "error");
             }
+        }
+
+        let approvalCheckInterval = null;
+
+        function startLiveApprovalCheck(profileId) {
+            if (approvalCheckInterval) clearInterval(approvalCheckInterval);
+
+            approvalCheckInterval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/orders/check-status/${profileId}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.approved) {
+                            clearInterval(approvalCheckInterval);
+                            
+                            // CANLI OLARAK EKRANI "SİPARİŞİNİZ ONAYLANDI" YAP!
+                            document.getElementById('modal-title-text').innerText = 'Ödemeniz Onaylandı ve Siparişiniz Alındı! 🎉';
+                            document.getElementById('modal-subtitle-text').innerText = 'Tebrikler! Ödemeniz teyit edilmiştir. Dijital kartvizit profiliniz aktifleştirilmiş ve Gümüş Metal NFC Kartınız basım aşamasına alınmıştır.';
+                            document.getElementById('iban-info-box').classList.add('hidden');
+                            
+                            const btnProfile = document.getElementById('btn-view-profile');
+                            btnProfile.innerText = '🎉 Aktif Profilimi Gör';
+                            btnProfile.className = 'w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-sm transition flex items-center justify-center space-x-2 shadow-xl shadow-emerald-600/30 animate-pulse';
+
+                            showToast('🎉 Ödemeniz Onaylandı ve Profiliniz Aktifleştirildi!', 'success');
+                        }
+                    }
+                } catch (e) {}
+            }, 3000);
         }
 
         function showToast(msg, type = 'success') {
