@@ -213,24 +213,93 @@
             </div>
         </section>
 
-        <!-- Features Grid -->
-        <div id="ozellikler" class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-24 text-left w-full">
-            <div class="glass-card p-8 rounded-3xl border border-slate-800/80 hover:border-indigo-500/40 transition duration-300 bg-slate-900/40">
-                <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xl mb-6 border border-indigo-500/20">
-                    <i class="fa-solid fa-address-book"></i>
+        <!-- Özellikler Section (Birebir Görseldeki Tasarım - Randevu Defteri Haricinde) -->
+        <section id="ozellikler" class="mt-28 text-left w-full max-w-6xl mx-auto border-t border-slate-800/80 pt-16">
+            
+            <div class="mb-12">
+                <div class="text-[11px] font-bold tracking-widest text-slate-400 uppercase mb-2 flex items-center space-x-2">
+                    <span class="w-4 h-[2px] bg-indigo-500"></span>
+                    <span>BİR KARTTAN FAZLASI</span>
                 </div>
-                <h3 class="text-xl font-bold mb-3 text-white">Rehbere Tek Tıkla Kaydet</h3>
-                <p class="text-slate-400 leading-relaxed text-sm">Müşteriniz kartı telefonuna yaklaştırdığında tek bir tıkla adınızı, telefonunuzu ve e-postanızı vCard formatında telefon rehberine kaydeder.</p>
+                <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                    Renk onların. <br>
+                    Sahne senin.
+                </h2>
+                <p class="mt-4 text-slate-400 text-sm max-w-xl leading-relaxed">
+                    Site siyah-beyaz, çünkü asıl yıldız senin işin. Her uygulama kendi rengiyle parlar — müşterin neye tıklayacağını bir bakışta bilir.
+                </p>
             </div>
 
-            <div class="glass-card p-8 rounded-3xl border border-slate-800/80 hover:border-purple-500/40 transition duration-300 bg-slate-900/40">
-                <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl mb-6 border border-purple-500/20">
-                    <i class="fa-solid fa-link"></i>
+            <!-- 5 Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- 1. Tek dokunuş iletişim -->
+                <div class="bg-[#18191d] p-7 rounded-3xl border border-slate-800/80 space-y-4 hover:border-emerald-500/30 transition">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white mb-1.5">Tek dokunuş iletişim</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">
+                            WhatsApp, arama, e-posta — karşı taraf uygulama indirmeden, düşünmeden ulaşır.
+                        </p>
+                    </div>
                 </div>
-                <h3 class="text-xl font-bold mb-3 text-white">Sınırsız Sosyal Medya & Link</h3>
-                <p class="text-slate-400 leading-relaxed text-sm">Instagram, Google Harita/Yorum, WhatsApp, LinkedIn, IBAN veya özel web sitelerinizi tek bir şık dijital profilde toplayın.</p>
+
+                <!-- 2. Konum & Google yorum -->
+                <div class="bg-[#18191d] p-7 rounded-3xl border border-slate-800/80 space-y-4 hover:border-emerald-500/30 transition">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white mb-1.5">Konum & Google yorum</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">
+                            Yol tarifi tek tık. Memnun müşterin karttan direkt Google'a yorum bırakır — haritada yükselirsin.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 3. Gerçek istatistik -->
+                <div class="bg-[#18191d] p-7 rounded-3xl border border-slate-800/80 space-y-4 hover:border-indigo-500/30 transition">
+                    <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white mb-1.5">Gerçek istatistik</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">
+                            Kaç kişi baktı, hangi bölüme tıkladı — panelden canlı izlersin.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 4. Kampanya, katalog & video -->
+                <div class="bg-[#18191d] p-7 rounded-3xl border border-slate-800/80 space-y-4 hover:border-purple-500/30 transition">
+                    <div class="w-10 h-10 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white mb-1.5">Kampanya, katalog & video</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">
+                            Kampanya afişin, ürün kataloğun (PDF) ve tanıtım videon kartında.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 5. Beni Ara -->
+                <div class="bg-[#18191d] p-7 rounded-3xl border border-slate-800/80 space-y-4 hover:border-emerald-500/30 transition">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500 text-slate-950 flex items-center justify-center text-base font-bold">
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white mb-1.5">"Beni Ara"</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">
+                            Ziyaretçi ad-telefon bırakır; sen müsait olunca ararsın.
+                        </p>
+                    </div>
+                </div>
+
             </div>
-        </div>
+        </section>
 
     </main>
 
