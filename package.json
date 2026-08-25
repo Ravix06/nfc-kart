@@ -1,5 +1,5 @@
 {
-  "name": "nfc-kart-isletmem",
+  "name": "nfc-kart",
   "version": "1.0.0",
   "description": "NFC Akıllı Dijital Kartvizit Platformu",
   "main": "server.js",

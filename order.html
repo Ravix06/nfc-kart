@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NFC Kart Siparişi Oluştur - NFS KART İŞLETMEM</title>
+    <title>NFC Kart Siparişi Oluştur - NFC KART</title>
 
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#4f46e5">
@@ -45,7 +45,7 @@
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
                     <i class="fa-solid fa-wifi text-lg transform rotate-90"></i>
                 </div>
-                <span class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-400">NFS KART İŞLETMEM</span>
+                <span class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-400">NFC KART</span>
             </a>
             <a href="/" class="text-xs text-slate-400 hover:text-white transition font-semibold flex items-center space-x-1">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Ana Sayfa
@@ -238,7 +238,7 @@
 
     <!-- Footer -->
     <footer class="border-t border-slate-800 py-6 text-center text-slate-500 text-xs">
-        <p>© 2026 NFS KART İŞLETMEM - Tüm Hakları Saklıdır.</p>
+        <p>© 2026 NFC KART - Tüm Hakları Saklıdır.</p>
     </footer>
 
     <!-- Form Handler Script -->
@@ -283,16 +283,6 @@
                 document.getElementById('success-profile-link').href = profileUrl;
                 document.getElementById('success-profile-link').innerText = profileUrl;
                 document.getElementById('btn-view-profile').href = profileUrl;
-
-                // Müşteri buton tıklamasa bile OTOMATİK bildirim mesajı aç
-                if (data.waNotifyUrl) {
-                    const btnWa = document.getElementById('btn-wa-notify');
-                    if (btnWa) {
-                        btnWa.href = data.waNotifyUrl;
-                    }
-                    // Otomatik WhatsApp Aç
-                    window.open(data.waNotifyUrl, '_blank');
-                }
 
                 document.getElementById('success-modal').classList.remove('hidden');
 

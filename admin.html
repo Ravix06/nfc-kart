@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Yönetim Paneli - NFC KART</title>
+    
+    <!-- PWA & Mobile Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/9374/9374972.png">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- QRCodeJS CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-96 opacity-0 bg-slate-800 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center space-x-3 pointer-events-none transition duration-300">
+        <i id="toast-icon" class="fa-solid fa-check-circle text-emerald-400 text-lg"></i>
+        <span id="toast-message" class="text-sm font-medium">İşlem başarılı</span>
+    </div>
+
+    <!-- Admin Password Protection Lock Screen Modal -->
+    <div id="login-modal" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-8 shadow-2xl text-center relative">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-3xl mx-auto mb-4 border border-indigo-500/30">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <h2 class="text-2xl font-black text-white">Yönetici Girişi</h2>
+            <p class="text-xs text-slate-400 mt-1 mb-6">Yönetim paneline erişmek için admin şifrenizi girin.</p>
+
+            <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                <div class="relative">
+                    <input type="password" id="admin-password-input" required placeholder="Admin Şifresi" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3.5 text-center text-base text-white focus:outline-none focus:border-indigo-500 tracking-wider">
+                </div>
+                <p id="login-error-msg" class="text-xs text-rose-400 font-semibold hidden"></p>
+                <button type="submit" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-sm transition shadow-lg shadow-indigo-600/30">
+                    Giriş Yap
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Admin Dashboard Content (Protected) -->
+    <div id="admin-content" class="flex-grow flex flex-col hidden">
+        <!-- Header / Navbar -->
+        <nav class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <a href="/" class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                        <i class="fa-solid fa-wifi text-lg transform rotate-90"></i>
+                    </div>
+                    <span class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-400">NFC KART</span>
+                </a>
+                <div class="flex items-center space-x-2">
+                    <button onclick="openFastWizard()" class="bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-extrabold px-3.5 py-2 rounded-xl transition shadow-lg shadow-emerald-500/20 flex items-center space-x-2 text-xs sm:text-sm">
+                        <i class="fa-solid fa-bolt text-sm"></i>
+                        <span>1 Dakikada Hızlı Kart</span>
+                    </button>
+
+                    <button onclick="openNewProfileModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-3 py-2 rounded-xl transition border border-slate-700 flex items-center space-x-1.5 text-xs">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="hidden sm:inline">Detaylı Kart</span>
+                    </button>
+
+                    <button onclick="logoutAdmin()" class="bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 px-3 py-2 rounded-xl transition border border-rose-800/60 text-xs font-semibold" title="Çıkış Yap">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Admin Container -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Yönetim Paneli</h1>
+                    <p class="text-slate-400 text-xs sm:text-sm mt-1">Kart profillerinizi ve gelen kargo siparişlerini buradan yönetin.</p>
+                </div>
+                
+                <!-- Nav Tabs -->
+                <div class="flex items-center space-x-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800">
+                    <button id="tab-btn-profiles" onclick="switchAdminTab('profiles')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-md">
+                        <i class="fa-solid fa-address-card mr-1.5"></i> Kart Profilleri (<span id="stat-total-cards">0</span>)
+                    </button>
+                    <button id="tab-btn-orders" onclick="switchAdminTab('orders')" class="px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white flex items-center">
+                        <i class="fa-solid fa-truck-fast mr-1.5 text-amber-400"></i> Gelen Siparişler <span id="stat-total-orders" class="ml-1.5 bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full text-[10px]">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 1: Profiles Grid -->
+            <div id="tab-content-profiles" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Profile Cards rendered dynamically -->
+            </div>
+
+            <!-- TAB 2: Orders List (Protected) -->
+            <div id="tab-content-orders" class="hidden space-y-4">
+                <div id="orders-list-container">
+                    <!-- Orders rendered dynamically -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ⚡ 1 Dakikada Hızlı Müşteri Oluşturma Modalı -->
+    <div id="fast-wizard-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl relative">
+            <button onclick="closeFastWizard()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl border border-amber-500/30">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-extrabold text-white leading-tight">Hızlı Müşteri Kart Sihirbazı</h3>
+                    <p class="text-xs text-slate-400">Yanınızdaki müşterinin bilgilerini girin, 1 tıkla karta basın.</p>
+                </div>
+            </div>
+
+            <form id="fast-wizard-form" onsubmit="handleFastWizardSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Müşteri Ad Soyad *</label>
+                    <input type="text" id="fast-name" required placeholder="Ahmet Yılmaz" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Ünvan / Meslek</label>
+                        <input type="text" id="fast-title" placeholder="Avukat / Mimar / Berber" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Firma Adı</label>
+                        <input type="text" id="fast-company" placeholder="Yılmaz Otomotiv" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Telefon Numarası</label>
+                    <input type="text" id="fast-phone" placeholder="0532 123 45 67" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Instagram Kullanıcı Adı</label>
+                    <div class="flex items-center rounded-xl bg-slate-950 border border-slate-800 px-3 py-2">
+                        <span class="text-slate-500 text-sm mr-1">@</span>
+                        <input type="text" id="fast-instagram" placeholder="kullanici_adi" class="bg-transparent text-white text-sm focus:outline-none w-full">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Google Harita / Yorum Linki</label>
+                    <input type="text" id="fast-google" placeholder="https://maps.google.com/..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">IBAN Numarası (Opsiyonel)</label>
+                    <input type="text" id="fast-iban" placeholder="TR00 0000 0000 0000 0000 0000 00" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-amber-500">
+                </div>
+
+                <button type="submit" class="w-full mt-2 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-emerald-500 to-teal-500 hover:from-amber-400 hover:to-teal-400 text-slate-950 font-black text-sm transition shadow-xl shadow-emerald-500/20 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-wifi transform rotate-90 text-lg"></i>
+                    <span>PROFİLİ OLUŞTUR VE KARTA YAZ!</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create / Edit Profile Modal -->
+    <div id="profile-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl p-6 sm:p-8 my-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeProfileModal()" class="absolute top-6 right-6 w-9 h-9 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <h2 id="modal-title" class="text-2xl font-bold text-white mb-6">Yeni Kart Profili Oluştur</h2>
+
+            <form id="profile-form" onsubmit="handleProfileSubmit(event)" class="space-y-6">
+                <input type="hidden" id="form-edit-id" value="">
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Profil ID / Kullanıcı Adı (NFC Linki)</label>
+                    <div class="flex items-center rounded-xl bg-slate-950 border border-slate-800 px-3 py-2.5">
+                        <span class="text-slate-500 text-sm font-mono mr-1" id="domain-prefix">.../p/</span>
+                        <input type="text" id="form-id" placeholder="ahmet-yilmaz" class="bg-transparent text-white font-mono text-sm focus:outline-none w-full">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Ad Soyad *</label>
+                        <input type="text" id="form-name" required placeholder="Ahmet Yılmaz" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Ünvan / Meslek</label>
+                        <input type="text" id="form-title" placeholder="Kıdemli Yazılım Mühendisi" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Şirket / Firma Adı</label>
+                        <input type="text" id="form-company" placeholder="NFS Medya & Teknoloji" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Şehir / Konum</label>
+                        <input type="text" id="form-location" placeholder="İstanbul, Türkiye" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Telefon Numarası</label>
+                        <input type="text" id="form-phone" placeholder="+90 532 123 45 67" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">E-posta Adresi</label>
+                        <input type="email" id="form-email" placeholder="ahmet@nfskartisletmem.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Profil Fotoğrafı (URL)</label>
+                        <input type="text" id="form-avatar" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Kapak Resmi (URL)</label>
+                        <input type="text" id="form-banner" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Biyografi / Açıklama</label>
+                    <textarea id="form-bio" rows="2" placeholder="Kısa biyografi veya firma tanıtımı..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
+                </div>
+
+                <div class="border-t border-slate-800 pt-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-xs font-bold uppercase tracking-wider text-slate-400">Sosyal Medya & Bağlantılar</label>
+                        <button type="button" onclick="addLinkRow()" class="text-xs bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white px-3 py-1.5 rounded-lg transition font-medium">
+                            <i class="fa-solid fa-plus mr-1"></i> Link Ekle
+                        </button>
+                    </div>
+                    <div id="form-links-container" class="space-y-3"></div>
+                </div>
+
+                <div class="border-t border-slate-800 pt-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-xs font-bold uppercase tracking-wider text-slate-400">Banka & IBAN Bilgileri</label>
+                        <button type="button" onclick="addIbanRow()" class="text-xs bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white px-3 py-1.5 rounded-lg transition font-medium">
+                            <i class="fa-solid fa-plus mr-1"></i> IBAN Ekle
+                        </button>
+                    </div>
+                    <div id="form-ibans-container" class="space-y-3"></div>
+                </div>
+
+                <div class="border-t border-slate-800 pt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="closeProfileModal()" class="px-5 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 font-semibold text-sm transition">İptal</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-sm transition shadow-lg shadow-indigo-600/30">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NFC Helper & QR Modal -->
+    <div id="nfc-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 text-center relative shadow-2xl">
+            <button onclick="closeNFCModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div class="w-14 h-14 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-2xl mx-auto mb-4 border border-indigo-500/20">
+                <i class="fa-solid fa-wifi transform rotate-90"></i>
+            </div>
+            
+            <h3 class="text-xl font-bold text-white mb-1">NFC Kart Yazma Bağlantısı</h3>
+            <p id="nfc-modal-name" class="text-sm text-indigo-400 font-semibold mb-4"></p>
+            
+            <div class="bg-slate-950 border border-slate-800 p-3 rounded-2xl mb-4 text-left">
+                <div class="text-xs text-slate-500 mb-1">Karta Yazılacak URL:</div>
+                <code id="nfc-modal-url" class="text-xs font-mono text-emerald-400 break-all select-all"></code>
+            </div>
+
+            <div class="flex justify-center p-4 bg-white rounded-2xl shadow-inner mb-4">
+                <div id="admin-qrcode"></div>
+            </div>
+
+            <div class="space-y-2">
+                <button id="btn-webnfc" onclick="writeNFCWithPhone()" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-2 hidden">
+                    <i class="fa-solid fa-mobile-screen-button text-lg animate-bounce"></i>
+                    <span>Telefondan Karta Yaz (Dokundur & Yaz)</span>
+                </button>
+                
+                <button onclick="copyNFCUrl()" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-copy"></i>
+                    <span>Bağlantıyı Kopyala</span>
+                </button>
+                <a id="nfc-preview-link" href="#" target="_blank" class="w-full py-2.5 glass-card hover:bg-slate-800 text-slate-300 font-semibold rounded-xl text-xs transition flex items-center justify-center space-x-2 border border-slate-800">
+                    <i class="fa-solid fa-external-link"></i>
+                    <span>Sayfayı Yeni Sekmede Önizle</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin JS -->
+    <script src="/js/admin.js"></script>
+</body>
+</html>
