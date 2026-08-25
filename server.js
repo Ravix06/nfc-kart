@@ -10,7 +10,7 @@ const DATA_FILE = path.join(__dirname, 'data', 'profiles.json');
 const ORDERS_FILE = path.join(__dirname, 'data', 'orders.json');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Ruken.12';
 
-// Bildirim Telefon Numarası (05078405206)
+// Bildirim Telefon Numarası & WhatsApp Grubu
 const NOTIFY_PHONE = '05078405206';
 const CLEAN_NOTIFY_PHONE = '905078405206';
 
@@ -70,16 +70,36 @@ function saveOrders(orders) {
     }
 }
 
-// Otomatik Bildirim Fonksiyonu
+// WHATSAPP NFC KART SİPARİŞ GRUBU BİLDİRİMİ
 function sendOrderNotification(order) {
-    const message = `🚨 SİPARİŞİNİZ GELDİ!!!\n\nSipariş No: ${order.id}\nMüşteri: ${order.customerName}\nTel: ${order.customerPhone}\nKart Rengi: ${order.cardColor}\nAdres: ${order.city}/${order.district} - ${order.address}`;
+    const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 WHATSAPP NFC KART SİPARİŞ GRUBU\n\nSipariş Kodu: ${order.id}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}`;
     
-    console.log(`====================================================`);
-    console.log(`📲 SİPARİŞİNİZ GELDİ!!! -> ${NOTIFY_PHONE}`);
-    console.log(message);
-    console.log(`====================================================`);
+    console.log(`\n====================================================`);
+    console.log(`💬 WHATSAPP NFC KART SİPARİŞ GRUBU BİLDİRİMİ:`);
+    console.log(`>>> SİPARİŞİNİZ GELDİ!!! <<<`);
+    console.log(notifyMsg);
+    console.log(`====================================================\n`);
 
-    // Netgsm Otomatik SMS Entegrasyonu
+    // WhatsApp Group Webhook / API Entegrasyonu (Eğer WhatsApp API Webhook tanımlı ise)
+    if (process.env.WHATSAPP_WEBHOOK_URL) {
+        const payload = JSON.stringify({ message: notifyMsg, phone: CLEAN_NOTIFY_PHONE });
+        const req = https.request(process.env.WHATSAPP_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        }, (res) => console.log('WhatsApp Grup API Yanıtı:', res.statusCode));
+        req.on('error', (e) => console.error('WhatsApp Grup Hatası:', e));
+        req.write(payload);
+        req.end();
+    }
+
+    // Telegram Bot Anlık Bildirimi
+    if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
+        const tgText = encodeURIComponent(notifyMsg);
+        const tgUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${process.env.TELEGRAM_CHAT_ID}&text=${tgText}`;
+        https.get(tgUrl, (res) => console.log('Telegram Bildirimi İletildi:', res.statusCode)).on('error', (e) => console.error('Telegram Hatası:', e));
+    }
+
+    // Netgsm SMS Otomatik Gönderici
     if (process.env.NETGSM_USER && process.env.NETGSM_PASS) {
         const xmlData = `<?xml version="1.0" encoding="UTF-8"?>
         <mainbody>
@@ -101,7 +121,7 @@ function sendOrderNotification(order) {
             path: '/sms/send/xml',
             method: 'POST',
             headers: { 'Content-Type': 'text/xml' }
-        }, (res) => console.log('SMS API Yanıtı:', res.statusCode));
+        }, (res) => console.log('Netgsm SMS Gönderildi:', res.statusCode));
         req.on('error', (e) => console.error('SMS Hatası:', e));
         req.write(xmlData);
         req.end();
@@ -198,7 +218,7 @@ app.post('/api/orders', (req, res) => {
         district: district || '',
         address,
         note: note || '',
-        cardColor: cardColor || 'Mat Siyah PVC',
+        cardColor: cardColor || 'Gümüş Metal',
         profileId: finalId,
         profileName: name,
         status: 'Bekliyor',
@@ -208,18 +228,14 @@ app.post('/api/orders', (req, res) => {
     orders.unshift(newOrder);
     saveOrders(orders);
 
-    // Otomatik Sipariş Bildirimi Tetikle
+    // WHATSAPP NFC KART SİPARİŞ GRUBUNA OTOMATİK BİLDİRİM GÖNDER
     sendOrderNotification(newOrder);
-
-    // WhatsApp Otomatik Bildirim Bağlantısı
-    const waNotifyUrl = `https://wa.me/${CLEAN_NOTIFY_PHONE}?text=${encodeURIComponent(`🚨 SİPARİŞİNİZ GELDİ!!!\n\nSipariş No: ${newOrder.id}\nMüşteri: ${newOrder.customerName}\nTel: ${newOrder.customerPhone}\nKart Rengi: ${newOrder.cardColor}\nAdres: ${newOrder.city}/${newOrder.district} - ${newOrder.address}\n\nProfil: ${req.protocol}://${req.get('host')}/p/${finalId}`)}`;
 
     res.status(201).json({ 
         success: true, 
+        message: 'SİPARİŞİNİZ GELDİ!!!',
         order: newOrder, 
-        profileId: finalId,
-        notifyPhone: NOTIFY_PHONE,
-        waNotifyUrl: waNotifyUrl
+        profileId: finalId
     });
 });
 
@@ -309,7 +325,7 @@ app.delete('/api/profiles/:id', requireAdminAuth, (req, res) => {
     let profiles = getProfiles();
     const initialLength = profiles.length;
     profiles = profiles.filter(p => p.id !== req.params.id);
-    if (profiles.length === initialLength) return res.status(404).json({ error: 'Profil bulunamadı' });
+    if (profiles.length === initialLength) return res.status(404).json({ error: 'Profil silindi' });
 
     saveProfiles(profiles);
     res.json({ message: 'Profil silindi' });
@@ -351,6 +367,6 @@ app.listen(PORT, () => {
     console.log(`====================================================`);
     console.log(`🚀 NFS Dijital Kartvizit Sunucusu Çalışıyor!`);
     console.log(`🔑 Admin Şifresi: ${ADMIN_PASSWORD}`);
-    console.log(`📲 Sipariş Bildirim Numarası: ${NOTIFY_PHONE}`);
+    console.log(`💬 WhatsApp NFC Kart Sipariş Grubu Bildirimi Aktif`);
     console.log(`====================================================`);
 });
