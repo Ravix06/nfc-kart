@@ -195,10 +195,77 @@
                 </div>
             </div>
 
+            <!-- STEP 4: Fiyat & Ödeme Bilgisi -->
+            <div class="glass-card p-6 sm:p-8 rounded-3xl border border-amber-500/30 bg-gradient-to-b from-amber-500/5 to-slate-900/50 space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-lg border border-amber-500/30">
+                            <i class="fa-solid fa-tag"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-extrabold text-white">Sipariş Adedi & Fiyat Özeti</h2>
+                            <p class="text-xs text-slate-400">Ücretsiz Kargo + Ömür Boyu Dijital Profil Dahil</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Adet Seçici (+ / -) -->
+                    <div class="flex items-center space-x-3 bg-slate-950 p-2 rounded-2xl border border-slate-800 self-start sm:self-auto">
+                        <span class="text-xs font-bold text-slate-400 ml-2">Sipariş Adedi:</span>
+                        <div class="flex items-center space-x-2">
+                            <button type="button" onclick="changeQuantity(-1)" class="w-8 h-8 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold flex items-center justify-center border border-slate-700 transition">
+                                <i class="fa-solid fa-minus text-xs"></i>
+                            </button>
+                            <span id="quantity-display" class="font-extrabold text-lg text-amber-400 w-8 text-center">1</span>
+                            <button type="button" onclick="changeQuantity(1)" class="w-8 h-8 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold flex items-center justify-center border border-slate-700 transition">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                    <div>
+                        <span class="text-xs text-slate-400 block">Birim Fiyat: <strong class="text-white">1.000 TL / Adet</strong></span>
+                        <span class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 inline-block mt-1">Kargo Ücretsiz</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-slate-400 block">Toplam Ödenecek Tutar:</span>
+                        <div id="total-price-display" class="text-3xl font-black text-amber-400">1.000 TL</div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="block text-xs font-bold text-slate-300">Ödeme Yöntemi Seçimi *</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="paymentMethod" value="IBAN Havale/EFT" checked class="peer hidden">
+                            <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 flex items-center space-x-3 transition">
+                                <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm"><i class="fa-solid fa-building-columns"></i></div>
+                                <div>
+                                    <span class="text-xs font-bold text-white block">IBAN / Banka Havalesi</span>
+                                    <span class="text-[10px] text-slate-400 block">Sipariş sonrası IBAN'a transfer</span>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="cursor-pointer">
+                            <input type="radio" name="paymentMethod" value="Kapıda Ödeme" class="peer hidden">
+                            <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 flex items-center space-x-3 transition">
+                                <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm"><i class="fa-solid fa-truck-ramp-box"></i></div>
+                                <div>
+                                    <span class="text-xs font-bold text-white block">Kapıda Ödeme</span>
+                                    <span class="text-[10px] text-slate-400 block">Kargo tesliminde Nakit/Kart</span>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
             <!-- Submit Button -->
-            <button type="submit" class="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 text-white font-extrabold text-lg shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center space-x-3">
-                <i class="fa-solid fa-paper-plane text-xl"></i>
-                <span>SİPARİŞİ OLUŞTUR VE GÖNDER</span>
+            <button type="submit" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-emerald-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-slate-950 font-black text-lg shadow-xl shadow-amber-500/20 transition transform hover:-translate-y-0.5 flex items-center justify-center space-x-3">
+                <i class="fa-solid fa-check-circle text-2xl"></i>
+                <span id="btn-submit-text">SİPARİŞİ OLUŞTUR (1.000 TL)</span>
             </button>
         </form>
     </main>
@@ -220,16 +287,30 @@
                 <a id="success-profile-link" href="#" target="_blank" class="text-sm font-mono text-indigo-400 underline break-all font-bold"></a>
             </div>
 
+            <!-- IBAN Ödeme Bilgileri Kutusu -->
+            <div id="iban-info-box" class="bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl text-left space-y-2">
+                <div class="flex items-center justify-between text-amber-400 font-bold text-xs">
+                    <span><i class="fa-solid fa-building-columns mr-1.5"></i>IBAN Ödeme Bilgileri (1.000 TL)</span>
+                    <span class="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-full">Havale / EFT / FAST</span>
+                </div>
+                <div class="text-xs text-slate-300 space-y-1 font-mono">
+                    <div><strong>Alıcı:</strong> NFC KART / RUKEN</div>
+                    <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800">
+                        <span id="iban-text-val" class="text-emerald-400 font-bold tracking-wider select-all">TR00 0000 0000 0000 0000 0000 00</span>
+                        <button onclick="copyToClipboard('TR000000000000000000000000', 'IBAN Numarası Kopyalandı!')" class="text-slate-400 hover:text-white text-xs px-2 py-1">
+                            <i class="fa-solid fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="text-[10px] text-slate-400 italic mt-1">Açıklama kısmına Ad Soyad yazarak 1.000 TL transfer ediniz.</div>
+                </div>
+            </div>
+
             <div class="pt-2 space-y-2">
-                <a id="btn-wa-notify" href="#" target="_blank" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30">
-                    <i class="fa-brands fa-whatsapp text-lg"></i>
-                    <span>Siparişi WhatsApp (05078405206) İle Gönder</span>
-                </a>
-                <a id="btn-view-profile" href="#" target="_blank" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-2">
+                <a id="btn-view-profile" href="#" target="_blank" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm transition flex items-center justify-center space-x-2">
                     <i class="fa-solid fa-eye"></i>
                     <span>Dijital Profilimi Gör</span>
                 </a>
-                <a href="/" class="w-full py-2 glass-card text-slate-300 font-semibold rounded-xl text-xs flex items-center justify-center">
+                <a href="/" class="w-full py-2.5 glass-card text-slate-300 font-semibold rounded-xl text-xs flex items-center justify-center">
                     Ana Sayfaya Dön
                 </a>
             </div>
@@ -243,11 +324,30 @@
 
     <!-- Form Handler Script -->
     <script>
+        let currentQuantity = 1;
+        const UNIT_PRICE = 1000;
+
+        function changeQuantity(delta) {
+            currentQuantity += delta;
+            if (currentQuantity < 1) currentQuantity = 1;
+            if (currentQuantity > 50) currentQuantity = 50;
+
+            const total = currentQuantity * UNIT_PRICE;
+            const formattedTotal = total.toLocaleString('tr-TR') + ' TL';
+
+            document.getElementById('quantity-display').innerText = currentQuantity;
+            document.getElementById('total-price-display').innerText = formattedTotal;
+            document.getElementById('btn-submit-text').innerText = `SİPARİŞİ OLUŞTUR (${formattedTotal})`;
+        }
+
         async function handleOrderSubmit(e) {
             e.preventDefault();
             
             const cardColorEl = document.querySelector('input[name="cardColor"]:checked');
+            const payMethodEl = document.querySelector('input[name="paymentMethod"]:checked');
             
+            const totalPriceStr = (currentQuantity * UNIT_PRICE).toLocaleString('tr-TR') + ' TL';
+
             const payload = {
                 name: document.getElementById('ord-name').value.trim(),
                 title: document.getElementById('ord-title').value.trim(),
@@ -257,7 +357,11 @@
                 instagram: document.getElementById('ord-instagram').value.trim(),
                 googleMap: document.getElementById('ord-google').value.trim(),
                 iban: document.getElementById('ord-iban').value.trim(),
-                cardColor: cardColorEl ? cardColorEl.value : 'Mat Siyah PVC',
+                cardColor: cardColorEl ? cardColorEl.value : 'Gümüş Metal',
+                paymentMethod: payMethodEl ? payMethodEl.value : 'IBAN Havale/EFT',
+                quantity: currentQuantity,
+                totalPrice: totalPriceStr,
+                price: totalPriceStr,
                 city: document.getElementById('ord-city').value.trim(),
                 district: document.getElementById('ord-district').value.trim(),
                 address: document.getElementById('ord-address').value.trim(),

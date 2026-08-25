@@ -76,7 +76,9 @@ function saveOrders(orders) {
 
 // TELEGRAM BOT ANLIK CEP BİLDİRİMİ GÖNDERİCİ
 async function sendTelegramNotification(order) {
-    const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 NFC KART SİPARİŞİ (1.000 TL)\n\nSipariş No: ${order.id}\nTutarı: 1.000 TL\nÖdeme Yöntemi: ${order.paymentMethod || 'IBAN Havale/EFT'}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}`;
+    const qty = order.quantity || 1;
+    const price = order.totalPrice || order.price || '1.000 TL';
+    const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 NFC KART SİPARİŞİ (${qty} ADET)\n\nSipariş No: ${order.id}\nAdet: ${qty} Adet\nToplam Tutar: ${price}\nÖdeme Yöntemi: ${order.paymentMethod || 'IBAN Havale/EFT'}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}`;
 
     try {
         // Fetch Chat IDs from Telegram Updates
@@ -209,12 +211,17 @@ app.post('/api/orders', (req, res) => {
 
     // Save Order
     const orders = getOrders();
+    const qty = parseInt(req.body.quantity) || 1;
+    const totalPriceCalc = req.body.totalPrice || req.body.price || `${(qty * 1000).toLocaleString('tr-TR')} TL`;
+
     const newOrder = {
         id: `siparis-${Date.now().toString().slice(-4)}`,
         customerName: name,
         customerPhone: phone,
         customerEmail: email || '',
-        price: '1.000 TL',
+        quantity: qty,
+        totalPrice: totalPriceCalc,
+        price: totalPriceCalc,
         paymentMethod: req.body.paymentMethod || 'IBAN Havale/EFT',
         city: city || '',
         district: district || '',
