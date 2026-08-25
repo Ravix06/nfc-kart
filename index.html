@@ -120,34 +120,51 @@
             </div>
 
             <!-- Right Interactive NFC Card Visual Mockup -->
-            <div class="lg:col-span-5 relative flex items-center justify-center py-6">
+            <div class="lg:col-span-5 relative flex items-center justify-center py-10 px-4">
                 
-                <!-- Floating Social Badges -->
-                <div class="absolute -top-4 right-12 w-12 h-12 bg-pink-600/20 border border-pink-500/30 rounded-2xl flex items-center justify-center text-pink-400 text-2xl shadow-lg animate-bounce">
+                <!-- Floating Social Badges (z-20 to float around card seamlessly) -->
+                <!-- Top Right: Instagram -->
+                <div class="absolute -top-2 right-4 sm:right-8 z-20 w-12 h-12 bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl shadow-pink-500/30 transform hover:scale-110 transition duration-300 animate-pulse">
                     <i class="fa-brands fa-instagram"></i>
                 </div>
-                <div class="absolute top-12 left-4 w-12 h-12 bg-emerald-600/20 border border-emerald-500/30 rounded-2xl flex items-center justify-center text-emerald-400 text-2xl shadow-lg">
+
+                <!-- Top Left: WhatsApp -->
+                <div class="absolute top-8 -left-2 sm:left-2 z-20 w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-slate-950 text-2xl shadow-xl shadow-emerald-500/30 transform hover:scale-110 transition duration-300">
                     <i class="fa-brands fa-whatsapp"></i>
                 </div>
-                <div class="absolute bottom-6 right-8 w-12 h-12 bg-rose-600/20 border border-rose-500/30 rounded-2xl flex items-center justify-center text-rose-500 text-2xl shadow-lg">
+
+                <!-- Bottom Right: YouTube -->
+                <div class="absolute -bottom-2 right-6 sm:right-10 z-20 w-12 h-12 bg-rose-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl shadow-rose-600/30 transform hover:scale-110 transition duration-300">
                     <i class="fa-brands fa-youtube"></i>
                 </div>
-                <div class="absolute bottom-16 left-8 w-12 h-12 bg-sky-600/20 border border-sky-500/30 rounded-2xl flex items-center justify-center text-sky-400 text-2xl shadow-lg">
+
+                <!-- Bottom Left: LinkedIn -->
+                <div class="absolute bottom-6 -left-3 sm:left-4 z-20 w-12 h-12 bg-sky-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl shadow-sky-600/30 transform hover:scale-110 transition duration-300">
                     <i class="fa-brands fa-linkedin"></i>
                 </div>
 
-                <!-- Gümüş / Siyah Metal NFC Card Visual -->
-                <div class="relative w-full max-w-sm aspect-[1.58/1] bg-gradient-to-tr from-slate-950 via-slate-900 to-slate-950 rounded-3xl p-6 border border-slate-700/80 shadow-2xl shadow-indigo-500/10 transform rotate-3 hover:rotate-0 transition duration-500 flex flex-col justify-between">
+                <!-- Top Center Small Badge: TikTok -->
+                <div class="absolute -top-6 left-1/3 z-20 w-10 h-10 bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-center text-white text-lg shadow-lg">
+                    <i class="fa-brands fa-tiktok"></i>
+                </div>
+
+                <!-- Middle Right: Map Pin -->
+                <div class="absolute top-1/2 -right-3 z-20 w-9 h-9 bg-emerald-500/20 border border-emerald-500/40 rounded-xl flex items-center justify-center text-emerald-400 text-base shadow-lg">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+
+                <!-- Gümüş / Siyah Metal NFC Card Visual (z-10) -->
+                <div class="relative z-10 w-full max-w-sm aspect-[1.58/1] bg-gradient-to-tr from-slate-950 via-slate-900 to-slate-950 rounded-3xl p-6 border border-slate-700/80 shadow-2xl shadow-indigo-500/20 transform rotate-3 hover:rotate-0 transition duration-500 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
-                        <span class="font-extrabold text-lg text-white tracking-tight">NFC KART CNR</span>
-                        <i class="fa-solid fa-wifi text-slate-400 text-xl transform rotate-90"></i>
+                        <span class="font-black text-lg text-white tracking-tight">NFC KART CNR</span>
+                        <i class="fa-solid fa-wifi text-slate-300 text-xl transform rotate-90"></i>
                     </div>
 
                     <div class="space-y-1">
-                        <div class="w-10 h-8 rounded-lg bg-slate-800/80 border border-slate-700"></div>
+                        <div class="w-10 h-8 rounded-lg bg-slate-800/90 border border-slate-700"></div>
                     </div>
 
-                    <div class="flex items-center justify-between text-[10px] tracking-widest text-slate-500 font-mono font-bold uppercase">
+                    <div class="flex items-center justify-between text-[10px] tracking-widest text-slate-400 font-mono font-bold uppercase">
                         <span>DOKUN</span>
                         <span>•</span>
                         <span>PAYLAŞ</span>
@@ -299,6 +316,122 @@
 
             </div>
         </section>
+
+        <!-- Temassız Takip & Google Yorum Kartları Özel Bölüm (Görsellerdeki Tasarım) -->
+        <section class="mt-28 text-left w-full max-w-6xl mx-auto border-t border-slate-800/80 pt-16">
+            <div class="mb-12">
+                <div class="text-[11px] font-bold tracking-widest text-slate-400 uppercase mb-2 flex items-center space-x-2">
+                    <span class="w-4 h-[2px] bg-gradient-to-r from-pink-500 to-amber-500"></span>
+                    <span>ÖZEL ÇÖZÜMLERİMİZ</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                    Bir dokunuş yeter. <br>
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-pink-400 via-purple-400 to-emerald-400">Temassız Takip & Yorum Kartları</span>
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- 1. TEMASSIZ INSTAGRAM TAKİP KARTI -->
+                <div class="bg-[#18191d] p-8 rounded-3xl border border-slate-800/80 hover:border-pink-500/40 transition space-y-6 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-2xl group-hover:bg-pink-500/20 transition"></div>
+                    
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 flex items-center justify-center text-white text-2xl shadow-lg">
+                            <i class="fa-brands fa-instagram"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-extrabold text-white">Temassız Instagram Takip Kartı</h3>
+                            <p class="text-xs text-pink-400 font-semibold">Bir dokunuş yeter.</p>
+                        </div>
+                    </div>
+
+                    <p class="text-slate-300 text-xs leading-relaxed">
+                        Müşteriniz telefonunu kartınıza yaklaştırır ve anında Instagram hesabınıza yönlendirilir. Takipçi sayınızı organik olarak katlayın!
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                            <div class="flex items-center space-x-2 text-pink-400 text-xs font-bold mb-1">
+                                <i class="fa-solid fa-wifi"></i>
+                                <span>MODERN</span>
+                            </div>
+                            <div class="text-[11px] text-slate-400">Dijital dünyaya uygun, çağdaş bir deneyim</div>
+                        </div>
+                        <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                            <div class="flex items-center space-x-2 text-sky-400 text-xs font-bold mb-1">
+                                <i class="fa-solid fa-mobile-screen"></i>
+                                <span>PRATİK</span>
+                            </div>
+                            <div class="text-[11px] text-slate-400">Uygulama indirmeye gerek yok</div>
+                        </div>
+                        <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                            <div class="flex items-center space-x-2 text-emerald-400 text-xs font-bold mb-1">
+                                <i class="fa-solid fa-heart"></i>
+                                <span>ETKİLİ</span>
+                            </div>
+                            <div class="text-[11px] text-slate-400">Takipçi sayınızı organik olarak artırır</div>
+                        </div>
+                        <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                            <div class="flex items-center space-x-2 text-purple-400 text-xs font-bold mb-1">
+                                <i class="fa-solid fa-chart-line"></i>
+                                <span>PROFESYONEL</span>
+                            </div>
+                            <div class="text-[11px] text-slate-400">Markanıza modern bir imaj kazandırır</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. TEMASSIZ GOOGLE 5 YILDIZ YORUM KARTI -->
+                <div class="bg-[#18191d] p-8 rounded-3xl border border-slate-800/80 hover:border-emerald-500/40 transition space-y-6 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition"></div>
+
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-2xl bg-white text-slate-950 flex items-center justify-center text-2xl font-black shadow-lg">
+                            <span class="text-blue-500">G</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-extrabold text-white flex items-center gap-2">
+                                <span>Temassız Google Yorum Kartı</span>
+                                <span class="text-amber-400 text-sm">★★★★★</span>
+                            </h3>
+                            <p class="text-xs text-emerald-400 font-semibold">Telefonunuzu buraya yaklaştırın 📶</p>
+                        </div>
+                    </div>
+
+                    <p class="text-slate-300 text-xs leading-relaxed">
+                        Memnun müşteriniz karttan direkt Google Harita profilinize 5 yıldızlı yorum bıraksın — Google haritalarda ilk sıraya yükselin!
+                    </p>
+
+                    <div class="grid grid-cols-3 gap-3 pt-2">
+                        <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800 text-center space-y-1">
+                            <i class="fa-solid fa-bolt text-amber-400 text-lg"></i>
+                            <div class="text-[11px] font-bold text-white">Hızlı ve Kolay</div>
+                        </div>
+                        <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800 text-center space-y-1">
+                            <i class="fa-solid fa-shield-halved text-emerald-400 text-lg"></i>
+                            <div class="text-[11px] font-bold text-white">Güvenli Temassız</div>
+                        </div>
+                        <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800 text-center space-y-1">
+                            <i class="fa-solid fa-users text-indigo-400 text-lg"></i>
+                            <div class="text-[11px] font-bold text-white">Deneyim Paylaş</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- WhatsApp & Aylık Ücret Yok Alt Duyuru Bandı (3. Görseldeki Birebir Tasarım) -->
+        <div class="mt-20 w-full max-w-4xl mx-auto text-center py-4 px-6 bg-slate-900/90 rounded-2xl border border-slate-800/80 text-xs sm:text-sm text-slate-300 flex items-center justify-center space-x-2 flex-wrap">
+            <span>Aylık ücret yok</span>
+            <span class="text-slate-600">•</span>
+            <span>Sorularınız için yalnızca</span>
+            <a href="https://wa.me/905078405206" target="_blank" class="text-emerald-400 font-extrabold hover:underline flex items-center space-x-1">
+                <i class="fa-brands fa-whatsapp text-sm"></i>
+                <span>WhatsApp'tan yazın (0507 840 52 06)</span>
+            </a>
+        </div>
 
     </main>
 
