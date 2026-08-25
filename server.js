@@ -76,7 +76,7 @@ function saveOrders(orders) {
 
 // TELEGRAM BOT ANLIK CEP BİLDİRİMİ GÖNDERİCİ
 async function sendTelegramNotification(order) {
-    const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 NFC KART SİPARİŞİ\n\nSipariş No: ${order.id}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}`;
+    const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 NFC KART SİPARİŞİ (1.000 TL)\n\nSipariş No: ${order.id}\nTutarı: 1.000 TL\nÖdeme Yöntemi: ${order.paymentMethod || 'IBAN Havale/EFT'}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}`;
 
     try {
         // Fetch Chat IDs from Telegram Updates
@@ -214,6 +214,8 @@ app.post('/api/orders', (req, res) => {
         customerName: name,
         customerPhone: phone,
         customerEmail: email || '',
+        price: '1.000 TL',
+        paymentMethod: req.body.paymentMethod || 'IBAN Havale/EFT',
         city: city || '',
         district: district || '',
         address,
