@@ -10,7 +10,11 @@ const DATA_FILE = path.join(__dirname, 'data', 'profiles.json');
 const ORDERS_FILE = path.join(__dirname, 'data', 'orders.json');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Ruken.12';
 
-// Bildirim Telefon Numarası & WhatsApp Grubu
+// Telegram Bot Entegrasyonu (@nfc_kart_siparis_bot)
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8768331983:AAHqiStLE65fI1yYRuqZR_92Bob2oLhZZ0A';
+let cachedChatIds = new Set();
+
+// Bildirim Telefon Numarası
 const NOTIFY_PHONE = '05078405206';
 const CLEAN_NOTIFY_PHONE = '905078405206';
 
@@ -70,62 +74,58 @@ function saveOrders(orders) {
     }
 }
 
-// WHATSAPP NFC KART SİPARİŞ GRUBU BİLDİRİMİ
+// TELEGRAM BOT ANLIK CEP BİLDİRİMİ GÖNDERİCİ
+async function sendTelegramNotification(order) {
+    const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 NFC KART SİPARİŞİ\n\nSipariş No: ${order.id}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}`;
+
+    try {
+        // Fetch Chat IDs from Telegram Updates
+        const updateUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates`;
+        https.get(updateUrl, (res) => {
+            let body = '';
+            res.on('data', chunk => body += chunk);
+            res.on('end', () => {
+                try {
+                    const data = JSON.parse(body);
+                    if (data.ok && Array.isArray(data.result)) {
+                        data.result.forEach(upd => {
+                            if (upd.message && upd.message.chat && upd.message.chat.id) {
+                                cachedChatIds.add(upd.message.chat.id);
+                            }
+                        });
+                    }
+
+                    // Broadcast Telegram Message to all registered Chat IDs
+                    if (cachedChatIds.size > 0) {
+                        cachedChatIds.forEach(chatId => {
+                            const tgText = encodeURIComponent(notifyMsg);
+                            const sendUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${chatId}&text=${tgText}`;
+                            https.get(sendUrl, (sRes) => {
+                                console.log(`✅ Telegram Bildirimi Telefonunuza Gönderildi (Chat ID: ${chatId})`);
+                            });
+                        });
+                    } else {
+                        console.log("⚠️ Telegram Bot henüz chat ID almadı. Lütfen t.me/nfc_kart_siparis_bot adresine girip BAŞLAT butonuna basın.");
+                    }
+                } catch (e) {
+                    console.error("Telegram parse error:", e);
+                }
+            });
+        }).on('error', (err) => console.error("Telegram updates error:", err));
+
+    } catch (err) {
+        console.error("Telegram notification dispatcher error:", err);
+    }
+}
+
 function sendOrderNotification(order) {
-    const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 WHATSAPP NFC KART SİPARİŞ GRUBU\n\nSipariş Kodu: ${order.id}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}`;
-    
     console.log(`\n====================================================`);
-    console.log(`💬 WHATSAPP NFC KART SİPARİŞ GRUBU BİLDİRİMİ:`);
-    console.log(`>>> SİPARİŞİNİZ GELDİ!!! <<<`);
-    console.log(notifyMsg);
+    console.log(`🚨 SİPARİŞİNİZ GELDİ!!! -> ${NOTIFY_PHONE}`);
+    console.log(`Müşteri: ${order.customerName} - Tel: ${order.customerPhone}`);
     console.log(`====================================================\n`);
 
-    // WhatsApp Group Webhook / API Entegrasyonu (Eğer WhatsApp API Webhook tanımlı ise)
-    if (process.env.WHATSAPP_WEBHOOK_URL) {
-        const payload = JSON.stringify({ message: notifyMsg, phone: CLEAN_NOTIFY_PHONE });
-        const req = https.request(process.env.WHATSAPP_WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        }, (res) => console.log('WhatsApp Grup API Yanıtı:', res.statusCode));
-        req.on('error', (e) => console.error('WhatsApp Grup Hatası:', e));
-        req.write(payload);
-        req.end();
-    }
-
-    // Telegram Bot Anlık Bildirimi
-    if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
-        const tgText = encodeURIComponent(notifyMsg);
-        const tgUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${process.env.TELEGRAM_CHAT_ID}&text=${tgText}`;
-        https.get(tgUrl, (res) => console.log('Telegram Bildirimi İletildi:', res.statusCode)).on('error', (e) => console.error('Telegram Hatası:', e));
-    }
-
-    // Netgsm SMS Otomatik Gönderici
-    if (process.env.NETGSM_USER && process.env.NETGSM_PASS) {
-        const xmlData = `<?xml version="1.0" encoding="UTF-8"?>
-        <mainbody>
-            <header>
-                <company code="${process.env.NETGSM_HEADER || 'NETGSM'}"/>
-                <usercode>${process.env.NETGSM_USER}</usercode>
-                <password>${process.env.NETGSM_PASS}</password>
-                <type>1:n</type>
-                <msgheader>${process.env.NETGSM_HEADER || 'NETGSM'}</msgheader>
-            </header>
-            <body>
-                <msg><![CDATA[SİPARİŞİNİZ GELDİ!!! Müşteri: ${order.customerName} - ${order.customerPhone}]]></msg>
-                <no>${CLEAN_NOTIFY_PHONE}</no>
-            </body>
-        </mainbody>`;
-
-        const req = https.request({
-            hostname: 'api.netgsm.com.tr',
-            path: '/sms/send/xml',
-            method: 'POST',
-            headers: { 'Content-Type': 'text/xml' }
-        }, (res) => console.log('Netgsm SMS Gönderildi:', res.statusCode));
-        req.on('error', (e) => console.error('SMS Hatası:', e));
-        req.write(xmlData);
-        req.end();
-    }
+    // Telegram Bot Bildirimi Tetikle
+    sendTelegramNotification(order);
 }
 
 // Middleware: Admin Auth Check
@@ -228,7 +228,7 @@ app.post('/api/orders', (req, res) => {
     orders.unshift(newOrder);
     saveOrders(orders);
 
-    // WHATSAPP NFC KART SİPARİŞ GRUBUNA OTOMATİK BİLDİRİM GÖNDER
+    // OTOMATİK TELEGRAM BİLDİRİMİ TETİKLE
     sendOrderNotification(newOrder);
 
     res.status(201).json({ 
@@ -365,8 +365,8 @@ app.get('/admin', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`====================================================`);
-    console.log(`🚀 NFS Dijital Kartvizit Sunucusu Çalışıyor!`);
+    console.log(`🚀 NFC KART Sunucusu Çalışıyor!`);
     console.log(`🔑 Admin Şifresi: ${ADMIN_PASSWORD}`);
-    console.log(`💬 WhatsApp NFC Kart Sipariş Grubu Bildirimi Aktif`);
+    console.log(`🤖 Telegram Bot Bildirici (@nfc_kart_siparis_bot) Aktif!`);
     console.log(`====================================================`);
 });
