@@ -1,0 +1,71 @@
+/* Custom CSS & Glassmorphism Theme for NFS Kart İşletmem */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: #0f172a;
+    color: #f8fafc;
+    min-height: 100vh;
+}
+
+/* Glass Card */
+.glass-card {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card-light {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: #0f172a;
+}
+
+/* Glowing Accent Button */
+.btn-glow {
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.5);
+}
+
+.btn-glow:hover {
+    box-shadow: 0 6px 28px 0px rgba(99, 102, 241, 0.7);
+    transform: translateY(-2px);
+}
+
+/* Social & Link Buttons Hover Animation */
+.link-card {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.link-card:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+/* Toast Notifications */
+#toast {
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
