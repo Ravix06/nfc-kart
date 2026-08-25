@@ -273,44 +273,61 @@
     <!-- Success Modal -->
     <div id="success-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-8 text-center relative shadow-2xl space-y-4">
-            <div class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-3xl mx-auto border border-emerald-500/30">
+            <!-- 1. İLK ÖDEME BİLGİSİ (IBAN KUTUSU) -->
+            <div id="iban-info-box" class="bg-amber-500/10 border border-amber-500/30 p-5 rounded-2xl text-left space-y-3">
+                <div class="flex items-center justify-between text-amber-400 font-bold text-xs border-b border-amber-500/20 pb-2">
+                    <span><i class="fa-solid fa-building-columns mr-1.5 text-sm"></i>1. ÖDEME BİLGİLERİ (IBAN)</span>
+                    <span id="modal-total-badge" class="text-[10px] bg-amber-500/20 px-2.5 py-0.5 rounded-full font-bold">1.000 TL</span>
+                </div>
+                <div class="text-xs text-slate-300 space-y-1 font-mono">
+                    <div><strong>Alıcı Hesabı:</strong> NFC KART / RUKEN</div>
+                    <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 my-1">
+                        <span id="iban-text-val" class="text-emerald-400 font-bold tracking-wider select-all text-xs">TR00 0000 0000 0000 0000 0000 00</span>
+                        <button type="button" onclick="copyToClipboard('TR000000000000000000000000', 'IBAN Kopyalandı!')" class="text-slate-300 hover:text-white bg-slate-800 px-2 py-1 rounded-lg text-xs">
+                            <i class="fa-solid fa-copy mr-1"></i>Kopyala
+                        </button>
+                    </div>
+                    <div class="text-[10px] text-amber-300 italic">⚠️ Lütfen açıklamaya Ad Soyad yazarak ödemenizi gerçekleştiriniz.</div>
+                </div>
+            </div>
+
+            <!-- 2. SONRA SİPARİŞİNİZ ALINDI BİLDİRİMİ -->
+            <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl mx-auto border border-emerald-500/30">
                 <i class="fa-solid fa-circle-check animate-bounce"></i>
             </div>
             
-            <h3 class="text-2xl font-black text-white">Siparişiniz Alındı! 🎉</h3>
+            <h3 class="text-xl font-black text-white">2. Siparişiniz Alındı! 🎉</h3>
             <p class="text-xs text-slate-300 leading-relaxed">
-                Tebrikler! Dijital kartvizit profiliniz anında oluşturuldu. Fiziksel NFC kartınız hazırlanıp kargoya teslim edilecektir.
+                Ödemeniz teyit edildikten sonra Gümüş Metal NFC Kartınız basılıp kargolanacaktır.
             </p>
 
-            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-left space-y-2">
-                <div class="text-xs text-slate-400">Oluşturulan Profil Adresiniz:</div>
-                <a id="success-profile-link" href="#" target="_blank" class="text-sm font-mono text-indigo-400 underline break-all font-bold"></a>
+            <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 text-left space-y-1.5">
+                <div class="text-[11px] text-slate-400">Taslak Profil Adresiniz:</div>
+                <a id="success-profile-link" href="#" target="_blank" class="text-xs font-mono text-indigo-400 underline break-all font-bold"></a>
             </div>
 
-            <!-- IBAN Ödeme Bilgileri Kutusu -->
-            <div id="iban-info-box" class="bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl text-left space-y-2">
-                <div class="flex items-center justify-between text-amber-400 font-bold text-xs">
-                    <span><i class="fa-solid fa-building-columns mr-1.5"></i>IBAN Ödeme Bilgileri (1.000 TL)</span>
-                    <span class="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-full">Havale / EFT / FAST</span>
+            <!-- 3. MÜŞTERİ DESTEK HATTI -->
+            <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex items-center justify-between text-xs">
+                <div class="flex items-center space-x-2 text-slate-300">
+                    <i class="fa-solid fa-headset text-indigo-400 text-sm"></i>
+                    <span>Müşteri Destek Hattı:</span>
                 </div>
-                <div class="text-xs text-slate-300 space-y-1 font-mono">
-                    <div><strong>Alıcı:</strong> NFC KART / RUKEN</div>
-                    <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800">
-                        <span id="iban-text-val" class="text-emerald-400 font-bold tracking-wider select-all">TR00 0000 0000 0000 0000 0000 00</span>
-                        <button onclick="copyToClipboard('TR000000000000000000000000', 'IBAN Numarası Kopyalandı!')" class="text-slate-400 hover:text-white text-xs px-2 py-1">
-                            <i class="fa-solid fa-copy"></i>
-                        </button>
-                    </div>
-                    <div class="text-[10px] text-slate-400 italic mt-1">Açıklama kısmına Ad Soyad yazarak 1.000 TL transfer ediniz.</div>
-                </div>
+                <a href="https://wa.me/905078405206" target="_blank" class="text-emerald-400 font-bold hover:underline flex items-center space-x-1 font-mono">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <span>0507 840 52 06</span>
+                </a>
             </div>
 
             <div class="pt-2 space-y-2">
-                <a id="btn-view-profile" href="#" target="_blank" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm transition flex items-center justify-center space-x-2">
+                <a id="btn-view-profile" href="#" target="_blank" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-2">
                     <i class="fa-solid fa-eye"></i>
-                    <span>Dijital Profilimi Gör</span>
+                    <span>Taslak Profilimi İncele</span>
                 </a>
-                <a href="/" class="w-full py-2.5 glass-card text-slate-300 font-semibold rounded-xl text-xs flex items-center justify-center">
+                <a href="https://wa.me/905078405206" target="_blank" class="w-full py-2.5 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition">
+                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                    <span>Sipariş / Ödeme Desteği Al (WhatsApp)</span>
+                </a>
+                <a href="/" class="w-full py-2 glass-card text-slate-400 hover:text-white font-semibold rounded-xl text-xs flex items-center justify-center">
                     Ana Sayfaya Dön
                 </a>
             </div>
