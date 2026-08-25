@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NFC Kart Siparişi Oluştur - NFS KART İŞLETMEM</title>
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-96 opacity-0 bg-slate-800 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center space-x-3 pointer-events-none transition duration-300">
+        <i id="toast-icon" class="fa-solid fa-check-circle text-emerald-400 text-lg"></i>
+        <span id="toast-message" class="text-sm font-medium">İşlem başarılı</span>
+    </div>
+
+    <!-- Header / Navbar -->
+    <nav class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-wifi text-lg transform rotate-90"></i>
+                </div>
+                <span class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-400">NFS KART İŞLETMEM</span>
+            </a>
+            <a href="/" class="text-xs text-slate-400 hover:text-white transition font-semibold flex items-center space-x-1">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Ana Sayfa
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-10 flex-grow w-full">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs font-semibold mb-4">
+                <i class="fa-solid fa-bolt text-amber-400"></i>
+                <span>Akıllı Temassız Dijital Kartvizit Siparişi</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight">Kendi NFC Kartını Oluştur</h1>
+            <p class="text-slate-400 text-sm mt-2 max-w-lg mx-auto">Aşağıdaki formu doldurun, dijital profiliniz anında oluşturulsun ve fiziksel NFC kartınız adresinize kargolansın!</p>
+        </div>
+
+        <form id="order-form" onsubmit="handleOrderSubmit(event)" class="space-y-8">
+            
+            <!-- STEP 1: Kart Bilgileri -->
+            <div class="glass-card p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-5">
+                <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
+                    <div class="w-8 h-8 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center font-bold text-sm">1</div>
+                    <h2 class="text-lg font-bold text-white">Kart ve Profil Bilgileriniz</h2>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Ad Soyad *</label>
+                        <input type="text" id="ord-name" required placeholder="Ahmet Yılmaz" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Ünvan / Meslek</label>
+                        <input type="text" id="ord-title" placeholder="Mimar / Avukat / Firma Sahibi" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Firma / Şirket Adı</label>
+                        <input type="text" id="ord-company" placeholder="Yılmaz Mimarlık" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">İletişim Telefon Numarası *</label>
+                        <input type="text" id="ord-phone" required placeholder="0532 123 45 67" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Instagram Kullanıcı Adı</label>
+                        <div class="flex items-center rounded-xl bg-slate-950 border border-slate-800 px-3 py-2.5">
+                            <span class="text-slate-500 text-sm mr-1">@</span>
+                            <input type="text" id="ord-instagram" placeholder="kullanici_adi" class="bg-transparent text-white text-sm focus:outline-none w-full">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Google Harita / Yorum Linki</label>
+                        <input type="text" id="ord-google" placeholder="https://maps.google.com/..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">E-posta Adresi</label>
+                    <input type="email" id="ord-email" placeholder="ahmet@example.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">IBAN Numarası (Opsiyonel)</label>
+                    <input type="text" id="ord-iban" placeholder="TR00 0000 0000 0000 0000 0000 00" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500">
+                </div>
+            </div>
+
+            <!-- STEP 2: Kart Tasarımı & Rengi -->
+            <div class="glass-card p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-4">
+                <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
+                    <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center font-bold text-sm">2</div>
+                    <h2 class="text-lg font-bold text-white">Kart Tipi Seçimi</h2>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <label class="opacity-50 cursor-not-allowed relative">
+                        <input type="radio" name="cardColor" value="Mat Siyah PVC" disabled class="peer hidden">
+                        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-center relative">
+                            <span class="absolute top-2 right-2 text-[9px] bg-rose-500/20 text-rose-400 border border-rose-500/30 px-1.5 py-0.5 rounded-md font-bold">Tükendi</span>
+                            <div class="w-8 h-8 rounded-full bg-slate-900 border border-slate-700 mx-auto mb-2 shadow-inner"></div>
+                            <span class="text-xs font-bold text-slate-500 block">Mat Siyah</span>
+                        </div>
+                    </label>
+
+                    <label class="opacity-50 cursor-not-allowed relative">
+                        <input type="radio" name="cardColor" value="Şeffaf Akıllı PVC" disabled class="peer hidden">
+                        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-center relative">
+                            <span class="absolute top-2 right-2 text-[9px] bg-rose-500/20 text-rose-400 border border-rose-500/30 px-1.5 py-0.5 rounded-md font-bold">Tükendi</span>
+                            <div class="w-8 h-8 rounded-full bg-slate-700/40 border border-slate-500 mx-auto mb-2"></div>
+                            <span class="text-xs font-bold text-slate-500 block">Şeffaf PVC</span>
+                        </div>
+                    </label>
+
+                    <label class="opacity-50 cursor-not-allowed relative">
+                        <input type="radio" name="cardColor" value="Ahşap NFC Kart" disabled class="peer hidden">
+                        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-center relative">
+                            <span class="absolute top-2 right-2 text-[9px] bg-rose-500/20 text-rose-400 border border-rose-500/30 px-1.5 py-0.5 rounded-md font-bold">Tükendi</span>
+                            <div class="w-8 h-8 rounded-full bg-amber-700/80 border border-amber-600 mx-auto mb-2"></div>
+                            <span class="text-xs font-bold text-slate-500 block">Ahşap Dokulu</span>
+                        </div>
+                    </label>
+
+                    <label class="cursor-pointer relative">
+                        <input type="radio" name="cardColor" value="Gümüş Metal" checked class="peer hidden">
+                        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 peer-checked:border-emerald-500 peer-checked:bg-emerald-600/10 text-center transition">
+                            <span class="absolute top-2 right-2 text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded-md font-bold">Stokta</span>
+                            <div class="w-8 h-8 rounded-full bg-slate-400 border border-slate-300 mx-auto mb-2"></div>
+                            <span class="text-xs font-bold text-white block">Gümüş Metal</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- STEP 3: Teslimat & Kargo Adresi -->
+            <div class="glass-card p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-5">
+                <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center font-bold text-sm">3</div>
+                    <h2 class="text-lg font-bold text-white">Teslimat & Kargo Adresi</h2>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">İl *</label>
+                        <input type="text" id="ord-city" required placeholder="İstanbul" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">İlçe *</label>
+                        <input type="text" id="ord-district" required placeholder="Kadıköy" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Açık Adres (Mahalle, Sokak, Bina No, Daire No) *</label>
+                    <textarea id="ord-address" required rows="3" placeholder="Caferağa Mah. Moda Cad. No:45 Daire:8" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Sipariş Notu (Opsiyonel)</label>
+                    <input type="text" id="ord-note" placeholder="Zile basılmasın / Kargo takip mesajı atılsın vb." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 text-white font-extrabold text-lg shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center space-x-3">
+                <i class="fa-solid fa-paper-plane text-xl"></i>
+                <span>SİPARİŞİ OLUŞTUR VE GÖNDER</span>
+            </button>
+        </form>
+    </main>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-8 text-center relative shadow-2xl space-y-4">
+            <div class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-3xl mx-auto border border-emerald-500/30">
+                <i class="fa-solid fa-circle-check animate-bounce"></i>
+            </div>
+            
+            <h3 class="text-2xl font-black text-white">Siparişiniz Alındı! 🎉</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                Tebrikler! Dijital kartvizit profiliniz anında oluşturuldu. Fiziksel NFC kartınız hazırlanıp kargoya teslim edilecektir.
+            </p>
+
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-left space-y-2">
+                <div class="text-xs text-slate-400">Oluşturulan Profil Adresiniz:</div>
+                <a id="success-profile-link" href="#" target="_blank" class="text-sm font-mono text-indigo-400 underline break-all font-bold"></a>
+            </div>
+
+            <div class="pt-2 space-y-2">
+                <a id="btn-wa-notify" href="#" target="_blank" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>Siparişi WhatsApp (05078405206) İle Gönder</span>
+                </a>
+                <a id="btn-view-profile" href="#" target="_blank" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-eye"></i>
+                    <span>Dijital Profilimi Gör</span>
+                </a>
+                <a href="/" class="w-full py-2 glass-card text-slate-300 font-semibold rounded-xl text-xs flex items-center justify-center">
+                    Ana Sayfaya Dön
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-6 text-center text-slate-500 text-xs">
+        <p>© 2026 NFS KART İŞLETMEM - Tüm Hakları Saklıdır.</p>
+    </footer>
+
+    <!-- Form Handler Script -->
+    <script>
+        async function handleOrderSubmit(e) {
+            e.preventDefault();
+            
+            const cardColorEl = document.querySelector('input[name="cardColor"]:checked');
+            
+            const payload = {
+                name: document.getElementById('ord-name').value.trim(),
+                title: document.getElementById('ord-title').value.trim(),
+                company: document.getElementById('ord-company').value.trim(),
+                phone: document.getElementById('ord-phone').value.trim(),
+                email: document.getElementById('ord-email').value.trim(),
+                instagram: document.getElementById('ord-instagram').value.trim(),
+                googleMap: document.getElementById('ord-google').value.trim(),
+                iban: document.getElementById('ord-iban').value.trim(),
+                cardColor: cardColorEl ? cardColorEl.value : 'Mat Siyah PVC',
+                city: document.getElementById('ord-city').value.trim(),
+                district: document.getElementById('ord-district').value.trim(),
+                address: document.getElementById('ord-address').value.trim(),
+                note: document.getElementById('ord-note').value.trim()
+            };
+
+            try {
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    showToast(err.error || 'Sipariş oluşturulamadı', 'error');
+                    return;
+                }
+
+                const data = await res.json();
+                const profileUrl = `${window.location.origin}/p/${data.profileId}`;
+
+                document.getElementById('success-profile-link').href = profileUrl;
+                document.getElementById('success-profile-link').innerText = profileUrl;
+                document.getElementById('btn-view-profile').href = profileUrl;
+
+                // Müşteri buton tıklamasa bile OTOMATİK bildirim mesajı aç
+                if (data.waNotifyUrl) {
+                    const btnWa = document.getElementById('btn-wa-notify');
+                    if (btnWa) {
+                        btnWa.href = data.waNotifyUrl;
+                    }
+                    // Otomatik WhatsApp Aç
+                    window.open(data.waNotifyUrl, '_blank');
+                }
+
+                document.getElementById('success-modal').classList.remove('hidden');
+
+            } catch (err) {
+                console.error("Order submit error:", err);
+                showToast("Sunucu hatası!", "error");
+            }
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            
+            if (type === 'error') {
+                icon.className = 'fa-solid fa-circle-xmark text-rose-500 text-lg';
+            } else {
+                icon.className = 'fa-solid fa-check-circle text-emerald-400 text-lg';
+            }
+
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.remove('translate-x-96', 'opacity-0');
+            toast.classList.add('translate-x-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0', 'opacity-100');
+                toast.classList.add('translate-x-96', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

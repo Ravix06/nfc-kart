@@ -2,49 +2,113 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'data', 'profiles.json');
+const ORDERS_FILE = path.join(__dirname, 'data', 'orders.json');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Ruken.12';
+
+// Bildirim Telefon Numarası (05078405206)
+const NOTIFY_PHONE = '05078405206';
+const CLEAN_NOTIFY_PHONE = '905078405206';
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Helper to read profiles from JSON file
+// Helpers: Read / Save Profiles
 function getProfiles() {
     try {
         if (!fs.existsSync(DATA_FILE)) {
             const dataDir = path.dirname(DATA_FILE);
-            if (!fs.existsSync(dataDir)) {
-                fs.mkdirSync(dataDir, { recursive: true });
-            }
+            if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
             fs.writeFileSync(DATA_FILE, '[]', 'utf8');
             return [];
         }
-        const data = fs.readFileSync(DATA_FILE, 'utf8');
-        return JSON.parse(data || '[]');
+        return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8') || '[]');
     } catch (err) {
         console.error("Profiles okuma hatası:", err);
         return [];
     }
 }
 
-// Helper to save profiles to JSON file
 function saveProfiles(profiles) {
     try {
         const dataDir = path.dirname(DATA_FILE);
-        if (!fs.existsSync(dataDir)) {
-            fs.mkdirSync(dataDir, { recursive: true });
-        }
+        if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
         fs.writeFileSync(DATA_FILE, JSON.stringify(profiles, null, 2), 'utf8');
     } catch (err) {
         console.error("Profiles kaydetme hatası:", err);
     }
 }
 
-// Middleware: Admin Giriş Kontrolü
+// Helpers: Read / Save Orders
+function getOrders() {
+    try {
+        if (!fs.existsSync(ORDERS_FILE)) {
+            const dataDir = path.dirname(ORDERS_FILE);
+            if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+            fs.writeFileSync(ORDERS_FILE, '[]', 'utf8');
+            return [];
+        }
+        return JSON.parse(fs.readFileSync(ORDERS_FILE, 'utf8') || '[]');
+    } catch (err) {
+        console.error("Orders okuma hatası:", err);
+        return [];
+    }
+}
+
+function saveOrders(orders) {
+    try {
+        const dataDir = path.dirname(ORDERS_FILE);
+        if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+        fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf8');
+    } catch (err) {
+        console.error("Orders kaydetme hatası:", err);
+    }
+}
+
+// Otomatik Bildirim Fonksiyonu
+function sendOrderNotification(order) {
+    const message = `🚨 SİPARİŞİNİZ GELDİ!!!\n\nSipariş No: ${order.id}\nMüşteri: ${order.customerName}\nTel: ${order.customerPhone}\nKart Rengi: ${order.cardColor}\nAdres: ${order.city}/${order.district} - ${order.address}`;
+    
+    console.log(`====================================================`);
+    console.log(`📲 SİPARİŞİNİZ GELDİ!!! -> ${NOTIFY_PHONE}`);
+    console.log(message);
+    console.log(`====================================================`);
+
+    // Netgsm Otomatik SMS Entegrasyonu
+    if (process.env.NETGSM_USER && process.env.NETGSM_PASS) {
+        const xmlData = `<?xml version="1.0" encoding="UTF-8"?>
+        <mainbody>
+            <header>
+                <company code="${process.env.NETGSM_HEADER || 'NETGSM'}"/>
+                <usercode>${process.env.NETGSM_USER}</usercode>
+                <password>${process.env.NETGSM_PASS}</password>
+                <type>1:n</type>
+                <msgheader>${process.env.NETGSM_HEADER || 'NETGSM'}</msgheader>
+            </header>
+            <body>
+                <msg><![CDATA[SİPARİŞİNİZ GELDİ!!! Müşteri: ${order.customerName} - ${order.customerPhone}]]></msg>
+                <no>${CLEAN_NOTIFY_PHONE}</no>
+            </body>
+        </mainbody>`;
+
+        const req = https.request({
+            hostname: 'api.netgsm.com.tr',
+            path: '/sms/send/xml',
+            method: 'POST',
+            headers: { 'Content-Type': 'text/xml' }
+        }, (res) => console.log('SMS API Yanıtı:', res.statusCode));
+        req.on('error', (e) => console.error('SMS Hatası:', e));
+        req.write(xmlData);
+        req.end();
+    }
+}
+
+// Middleware: Admin Auth Check
 function requireAdminAuth(req, res, next) {
     const authHeader = req.headers['authorization'] || req.headers['x-admin-password'];
     if (authHeader === ADMIN_PASSWORD || authHeader === `Bearer ${ADMIN_PASSWORD}`) {
@@ -53,7 +117,7 @@ function requireAdminAuth(req, res, next) {
     return res.status(401).json({ error: 'Yetkisiz erişim! Geçersiz admin şifresi.' });
 }
 
-// API: Admin Giriş Doğrulama
+// API: Admin Login
 app.post('/api/admin/login', (req, res) => {
     const { password } = req.body;
     if (password === ADMIN_PASSWORD) {
@@ -62,39 +126,142 @@ app.post('/api/admin/login', (req, res) => {
     return res.status(401).json({ success: false, error: 'Hatalı Admin Şifresi!' });
 });
 
-// API: Tum profilleri getir (Genel erişim)
-app.get('/api/profiles', (req, res) => {
+// API: Müşteri Sipariş Oluşturma (Genel Erişim)
+app.post('/api/orders', (req, res) => {
+    const { name, title, company, phone, email, instagram, googleMap, iban, city, district, address, note, cardColor } = req.body;
+
+    if (!name || !phone || !address) {
+        return res.status(400).json({ error: 'Lütfen Ad Soyad, Telefon ve Teslimat Adresi alanlarını doldurun.' });
+    }
+
     const profiles = getProfiles();
-    res.json(profiles);
+    
+    let id = name.toLowerCase()
+        .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+
+    let finalId = id;
+    let counter = 1;
+    while (profiles.some(p => p.id === finalId)) {
+        finalId = `${id}-${counter}`;
+        counter++;
+    }
+
+    const links = [];
+    if (instagram) {
+        const cleanInsta = instagram.replace(/^@/, '').trim();
+        links.push({ title: 'Instagram Hesabım', url: `https://instagram.com/${cleanInsta}`, icon: 'instagram' });
+    }
+    if (googleMap) {
+        links.push({ title: 'Google Harita & Yorum Yap', url: googleMap.startsWith('http') ? googleMap : `https://${googleMap}`, icon: 'google' });
+    }
+    if (phone) {
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        links.push({ title: 'WhatsApp ile İletişim', url: `https://wa.me/${cleanPhone}`, icon: 'whatsapp' });
+    }
+
+    const ibans = [];
+    if (iban) {
+        ibans.push({ bank: 'Banka Hesabı', name, iban });
+    }
+
+    const newProfile = {
+        id: finalId,
+        name,
+        title: title || 'Müşteri',
+        company: company || '',
+        bio: `${name} dijital kartvizit profili.`,
+        phone,
+        email: email || '',
+        location: `${city || ''} ${district || ''}`.trim(),
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80',
+        banner: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+        links,
+        ibans,
+        views: 0,
+        createdAt: new Date().toISOString()
+    };
+
+    profiles.push(newProfile);
+    saveProfiles(profiles);
+
+    // Save Order
+    const orders = getOrders();
+    const newOrder = {
+        id: `siparis-${Date.now().toString().slice(-4)}`,
+        customerName: name,
+        customerPhone: phone,
+        customerEmail: email || '',
+        city: city || '',
+        district: district || '',
+        address,
+        note: note || '',
+        cardColor: cardColor || 'Mat Siyah PVC',
+        profileId: finalId,
+        profileName: name,
+        status: 'Bekliyor',
+        createdAt: new Date().toISOString()
+    };
+
+    orders.unshift(newOrder);
+    saveOrders(orders);
+
+    // Otomatik Sipariş Bildirimi Tetikle
+    sendOrderNotification(newOrder);
+
+    // WhatsApp Otomatik Bildirim Bağlantısı
+    const waNotifyUrl = `https://wa.me/${CLEAN_NOTIFY_PHONE}?text=${encodeURIComponent(`🚨 SİPARİŞİNİZ GELDİ!!!\n\nSipariş No: ${newOrder.id}\nMüşteri: ${newOrder.customerName}\nTel: ${newOrder.customerPhone}\nKart Rengi: ${newOrder.cardColor}\nAdres: ${newOrder.city}/${newOrder.district} - ${newOrder.address}\n\nProfil: ${req.protocol}://${req.get('host')}/p/${finalId}`)}`;
+
+    res.status(201).json({ 
+        success: true, 
+        order: newOrder, 
+        profileId: finalId,
+        notifyPhone: NOTIFY_PHONE,
+        waNotifyUrl: waNotifyUrl
+    });
 });
 
-// API: Tek profil getir (Genel erişim)
+// API: Siparişleri Getir
+app.get('/api/orders', requireAdminAuth, (req, res) => {
+    res.json(getOrders());
+});
+
+// API: Sipariş Sil / Tamamla
+app.delete('/api/orders/:id', requireAdminAuth, (req, res) => {
+    let orders = getOrders();
+    const initialLen = orders.length;
+    orders = orders.filter(o => o.id !== req.params.id);
+    if (orders.length === initialLen) return res.status(404).json({ error: 'Sipariş bulunamadı' });
+    saveOrders(orders);
+    res.json({ success: true, message: 'Sipariş tamamlandı' });
+});
+
+// API: Profiles REST CRUD
+app.get('/api/profiles', (req, res) => {
+    res.json(getProfiles());
+});
+
 app.get('/api/profiles/:id', (req, res) => {
     const profiles = getProfiles();
     const profile = profiles.find(p => p.id === req.params.id);
-    if (!profile) {
-        return res.status(404).json({ error: 'Profil bulunamadı' });
-    }
+    if (!profile) return res.status(404).json({ error: 'Profil bulunamadı' });
     profile.views = (profile.views || 0) + 1;
     saveProfiles(profiles);
     res.json(profile);
 });
 
-// API: Yeni profil oluştur (ŞİFRE KORUMALI)
 app.post('/api/profiles', requireAdminAuth, (req, res) => {
     const profiles = getProfiles();
     let { id, name, title, company, bio, phone, email, location, avatar, banner, theme, links, ibans } = req.body;
     
-    if (!name) {
-        return res.status(400).json({ error: 'İsim alanı zorunludur' });
-    }
+    if (!name) return res.status(400).json({ error: 'İsim alanı zorunludur' });
 
     if (!id || id.trim() === '') {
         id = name.toLowerCase()
             .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
-            .replace(/[^a-z0-9]/g, '-')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '');
+            .replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     }
 
     let finalId = id;
@@ -127,57 +294,39 @@ app.post('/api/profiles', requireAdminAuth, (req, res) => {
     res.status(201).json(newProfile);
 });
 
-// API: Profil Güncelle (ŞİFRE KORUMALI)
 app.put('/api/profiles/:id', requireAdminAuth, (req, res) => {
     const profiles = getProfiles();
     const index = profiles.findIndex(p => p.id === req.params.id);
-    if (index === -1) {
-        return res.status(404).json({ error: 'Profil bulunamadı' });
-    }
+    if (index === -1) return res.status(404).json({ error: 'Profil bulunamadı' });
 
-    const current = profiles[index];
-    const updatedProfile = {
-        ...current,
-        ...req.body,
-        id: current.id
-    };
-
+    const updatedProfile = { ...profiles[index], ...req.body, id: profiles[index].id };
     profiles[index] = updatedProfile;
     saveProfiles(profiles);
     res.json(updatedProfile);
 });
 
-// API: Profil Sil (ŞİFRE KORUMALI)
 app.delete('/api/profiles/:id', requireAdminAuth, (req, res) => {
     let profiles = getProfiles();
     const initialLength = profiles.length;
     profiles = profiles.filter(p => p.id !== req.params.id);
-    
-    if (profiles.length === initialLength) {
-        return res.status(404).json({ error: 'Profil bulunamadı' });
-    }
+    if (profiles.length === initialLength) return res.status(404).json({ error: 'Profil bulunamadı' });
 
     saveProfiles(profiles);
-    res.json({ message: 'Profil başarıyla silindi' });
+    res.json({ message: 'Profil silindi' });
 });
 
-// API: vCard (.vcf) Telefon Rehberine Kaydetme Servisi
 app.get('/api/vcard/:id', (req, res) => {
     const profiles = getProfiles();
     const profile = profiles.find(p => p.id === req.params.id);
-    if (!profile) {
-        return res.status(404).send('Profil bulunamadı');
-    }
+    if (!profile) return res.status(404).send('Profil bulunamadı');
 
     let vcard = `BEGIN:VCARD\r\nVERSION:3.0\r\n`;
-    vcard += `N:${profile.name};;;;\r\n`;
-    vcard += `FN:${profile.name}\r\n`;
+    vcard += `N:${profile.name};;;;\r\nFN:${profile.name}\r\n`;
     if (profile.company) vcard += `ORG:${profile.company}\r\n`;
     if (profile.title) vcard += `TITLE:${profile.title}\r\n`;
     if (profile.phone) vcard += `TEL;TYPE=CELL:${profile.phone}\r\n`;
     if (profile.email) vcard += `EMAIL:${profile.email}\r\n`;
     if (profile.location) vcard += `ADR;TYPE=WORK:;;${profile.location};;;;\r\n`;
-    if (profile.bio) vcard += `NOTE:${profile.bio}\r\n`;
     vcard += `END:VCARD\r\n`;
 
     res.setHeader('Content-Type', 'text/vcard; charset=utf-8');
@@ -185,7 +334,11 @@ app.get('/api/vcard/:id', (req, res) => {
     res.send(vcard);
 });
 
-// Rotalar
+// HTML Rotaları
+app.get('/order', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'order.html'));
+});
+
 app.get('/p/:id', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
@@ -197,8 +350,7 @@ app.get('/admin', (req, res) => {
 app.listen(PORT, () => {
     console.log(`====================================================`);
     console.log(`🚀 NFS Dijital Kartvizit Sunucusu Çalışıyor!`);
-    console.log(`🔑 Varsayılan Admin Şifresi: ${ADMIN_PASSWORD}`);
-    console.log(`🌐 Ana Sayfa:      http://localhost:${PORT}`);
-    console.log(`⚙️ Yönetim Paneli: http://localhost:${PORT}/admin`);
+    console.log(`🔑 Admin Şifresi: ${ADMIN_PASSWORD}`);
+    console.log(`📲 Sipariş Bildirim Numarası: ${NOTIFY_PHONE}`);
     console.log(`====================================================`);
 });

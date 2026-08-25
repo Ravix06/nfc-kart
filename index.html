@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFS KART İŞLETMEM - Dijital Akıllı Kartvizit Platformu</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 flex flex-col min-h-screen">
+
+    <!-- Header / Navbar -->
+    <nav class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-wifi text-lg transform rotate-90"></i>
+                </div>
+                <span class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-400">NFS KART İŞLETMEM</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/admin" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-xl transition duration-200 shadow-md shadow-indigo-600/30 flex items-center space-x-2">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Yönetim Paneli</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col items-center justify-center text-center">
+        <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-sm font-medium mb-8">
+            <span class="flex h-2 w-2 rounded-full bg-indigo-400 animate-pulse"></span>
+            <span>Akıllı Temassız NFC Dijital Kartvizit Dönemi</span>
+        </div>
+
+        <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight max-w-4xl leading-tight">
+            Kartvizitinizi Telefonun Arkasına Yaklaştırın, <span class="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">Tüm Bilgileriniz Anında Açılsın!</span>
+        </h1>
+
+        <p class="mt-6 text-lg sm:text-xl text-slate-400 max-w-2xl">
+            Kağıt kartvizit israfına son verin. Tek bir NFC kart ile Instagram, WhatsApp, Google Yorumları, Haritayı ve rehbere kaydetme seçeneğini müşterilerinize sunun.
+        </p>
+
+        <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="/order" class="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 py-4 rounded-2xl shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center space-x-3 text-lg">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span>Kendi Kartını Oluştur</span>
+            </a>
+            <a href="/p/ahmet-yilmaz" target="_blank" class="w-full sm:w-auto glass-card hover:bg-slate-800 text-slate-200 font-semibold px-8 py-4 rounded-2xl transition border border-slate-700 flex items-center justify-center space-x-2 text-lg">
+                <i class="fa-solid fa-eye text-indigo-400"></i>
+                <span>Örnek Profili İncele</span>
+            </a>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-24 text-left w-full">
+            <div class="glass-card p-8 rounded-3xl border border-slate-800 hover:border-indigo-500/40 transition duration-300">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xl mb-6">
+                    <i class="fa-solid fa-address-book"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Rehbere Tek Tıkla Kaydet</h3>
+                <p class="text-slate-400 leading-relaxed">Müşteriniz kartı telefonuna yaklaştırdığında tek bir tıkla adınızı, telefonunuzu ve e-postanızı vCard formatında telefon rehberine kaydeder.</p>
+            </div>
+
+            <div class="glass-card p-8 rounded-3xl border border-slate-800 hover:border-indigo-500/40 transition duration-300">
+                <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl mb-6">
+                    <i class="fa-solid fa-link"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Sınırsız Sosyal Medya & Link</h3>
+                <p class="text-slate-400 leading-relaxed">Instagram, Google Harita/Yorum, WhatsApp, LinkedIn, IBAN veya özel web sitelerinizi tek bir şık dijital profilde toplayın.</p>
+            </div>
+        </div>
+
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-8 text-center text-slate-500 text-sm">
+        <p>© 2026 NFS KART İŞLETMEM - Tüm Hakları Saklıdır.</p>
+    </footer>
+</body>
+</html>
