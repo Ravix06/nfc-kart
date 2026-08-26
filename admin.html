@@ -71,7 +71,10 @@
         <nav class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <a href="/" class="flex items-center space-x-3">
-                    <img src="/img/logo.jpg" alt="NFC KART CNR Logo" class="w-10 h-10 rounded-xl object-cover border border-indigo-500/40 shadow-lg shadow-indigo-500/30">
+                    <img src="/img/logo.jpg" alt="NFC KART CNR Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" class="w-10 h-10 rounded-xl object-cover border border-indigo-500/40 shadow-lg shadow-indigo-500/30">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 hidden items-center justify-center text-white shadow-lg shadow-indigo-500/30 shrink-0">
+                        <i class="fa-solid fa-wifi text-lg transform rotate-90"></i>
+                    </div>
                     <span class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-400">NFC KART CNR</span>
                 </a>
                 <div class="flex items-center space-x-2">
