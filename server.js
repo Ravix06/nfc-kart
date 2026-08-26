@@ -102,14 +102,42 @@ function activateOrderProfile(order) {
     if (!order || !order.draftProfile) return false;
 
     const profiles = getProfiles();
-    if (!profiles.some(p => p.id === order.draftProfile.id)) {
+    const existingIndex = profiles.findIndex(p => p.id === order.draftProfile.id);
+    if (existingIndex !== -1) {
+        profiles[existingIndex] = { ...profiles[existingIndex], ...order.draftProfile };
+        saveProfiles(profiles);
+        console.log(`✅ PROFİL GÜNCELLENDİ & AKTİF: ${order.draftProfile.name} -> Kart Profillerinde Güncellendi!`);
+        return true;
+    } else {
         profiles.push(order.draftProfile);
         saveProfiles(profiles);
         console.log(`✅ PROFİL AKTİF EDİLDİ: ${order.draftProfile.name} -> Kart Profillerine Eklendi!`);
         return true;
     }
-    return false;
 }
+
+// TÜM TAMAMLANGAN/ONAYLANGAN SİPARİŞLERİ SİSTEM BAŞLANGICINDA OTOMATİK TARAYIP KART PROFİLLERİNE AKTARAN FONKSİYON
+function syncAllCompletedOrdersToProfiles() {
+    try {
+        const orders = getOrders();
+        let syncCount = 0;
+        orders.forEach(ord => {
+            const isCompleted = (ord.status || '').includes('Tamamlandı') || (ord.status || '').includes('Kargolandı') || (ord.status || '').includes('Onaylandı');
+            if (isCompleted && ord.draftProfile) {
+                activateOrderProfile(ord);
+                syncCount++;
+            }
+        });
+        if (syncCount > 0) {
+            console.log(`⚡ OTOMATİK SENKRONİZASYON: ${syncCount} adet tamamlanan sipariş Kart Profillerine aktarıldı!`);
+        }
+    } catch (e) {
+        console.error("Senkronizasyon hatası:", e);
+    }
+}
+
+// Sunucu açılışında tamamlanan tüm siparişleri profillere aktar
+syncAllCompletedOrdersToProfiles();
 
 // TELEGRAM BOT ANLIK CEP BİLDİRİMİ VE ONAY BUTONU GÖNDERİCİ (GARANTİ 100% İLETİM)
 async function sendTelegramNotification(order) {
