@@ -576,9 +576,18 @@ app.get('/api/vcard/:id', (req, res) => {
     res.send(vcard);
 });
 
-// Google Verification Route
+// Google Verification & SEO Crawl Routes
 app.get('/google24176a52df022b5f.html', (req, res) => {
     res.send('google-site-verification: google24176a52df022b5f.html');
+});
+
+app.get('/robots.txt', (req, res) => {
+    res.type('text/plain');
+    res.send("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/admin/\n\nSitemap: https://nfc-kart.onrender.com/sitemap.xml\n");
+});
+
+app.get('/sitemap.xml', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'));
 });
 
 // HTML Rotaları
