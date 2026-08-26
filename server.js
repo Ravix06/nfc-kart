@@ -142,7 +142,7 @@ syncAllCompletedOrdersToProfiles();
 // TELEGRAM BOT ANLIK CEP BİLDİRİMİ VE ONAY BUTONU GÖNDERİCİ (GARANTİ 100% İLETİM)
 async function sendTelegramNotification(order) {
     const qty = order.quantity || 1;
-    const price = order.totalPrice || order.price || '1.000 TL';
+    const price = order.totalPrice || order.price || '500 TL';
     const isKapida = (order.paymentMethod || '').includes('Kapıda');
 
     const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 NFC KART CNR SİPARİŞİ (${qty} ADET)\n\nSipariş No: ${order.id}\nAdet: ${qty} Adet\nToplam Tutar: ${price}\nÖdeme Yöntemi: ${order.paymentMethod || 'IBAN Havale/EFT'}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}\n\nDurum: ${isKapida ? 'Kapıda Ödeme (Hazırlanacak)' : 'Bekliyor (Ödeme Onayı Bekleniyor)'}`;
@@ -401,7 +401,7 @@ app.post('/api/orders', (req, res) => {
     // Save Order (Draft Profile ile birlikte)
     const orders = getOrders();
     const qty = parseInt(req.body.quantity) || 1;
-    const totalPriceCalc = req.body.totalPrice || req.body.price || `${(qty * 1000).toLocaleString('tr-TR')} TL`;
+    const totalPriceCalc = req.body.totalPrice || req.body.price || `${(qty * 500).toLocaleString('tr-TR')} TL`;
 
     const newOrder = {
         id: `siparis-${Date.now().toString().slice(-4)}`,
