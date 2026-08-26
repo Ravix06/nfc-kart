@@ -576,6 +576,15 @@ app.get('/api/vcard/:id', (req, res) => {
     res.send(vcard);
 });
 
+// JS Fallback Rotaları
+app.get(['/js/admin.js', '/admin.js'], (req, res) => {
+    const rootJs = path.join(__dirname, 'admin.js');
+    const pubJs = path.join(__dirname, 'public', 'js', 'admin.js');
+    if (fs.existsSync(rootJs)) return res.sendFile(rootJs);
+    if (fs.existsSync(pubJs)) return res.sendFile(pubJs);
+    res.sendFile(pubJs);
+});
+
 // Google Verification & SEO Crawl Routes
 app.get('/google24176a52df022b5f.html', (req, res) => {
     res.send('google-site-verification: google24176a52df022b5f.html');
