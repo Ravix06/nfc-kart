@@ -615,7 +615,22 @@ app.get('/sitemap.xml', (req, res) => {
 
 // HTML Rotaları
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    const rootPath = path.join(__dirname, 'index.html');
+    const pubPath = path.join(__dirname, 'public', 'index.html');
+    
+    if (fs.existsSync(rootPath)) {
+        try {
+            const rootContent = fs.readFileSync(rootPath, 'utf8');
+            if (rootContent.includes('NFC KART CNR')) return res.sendFile(rootPath);
+        } catch(e) {}
+    }
+    if (fs.existsSync(pubPath)) {
+        try {
+            const pubContent = fs.readFileSync(pubPath, 'utf8');
+            if (pubContent.includes('NFC KART CNR')) return res.sendFile(pubPath);
+        } catch(e) {}
+    }
+    res.sendFile(pubPath);
 });
 
 app.get('/order', (req, res) => {
