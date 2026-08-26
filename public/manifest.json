@@ -1,6 +1,6 @@
 {
-  "name": "NFS KART İŞLETMEM",
-  "short_name": "NFS Kart",
+  "name": "NFC KART CNR",
+  "short_name": "NFC KART CNR",
   "description": "NFC Akıllı Dijital Kartvizit Platformu ve NFC Kart Yazıcı",
   "start_url": "/admin",
   "display": "standalone",
