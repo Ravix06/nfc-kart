@@ -22,7 +22,8 @@ let lastTelegramUpdateId = 0;
 const NOTIFY_PHONE = '05078405206';
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Load stored Telegram Chat IDs permanently
@@ -257,6 +258,31 @@ function sendOrderNotification(order) {
 
     sendTelegramNotification(order);
 }
+
+// Customer Login & Orders API (Sadece kendi telefon numarasıyla sipariş sorgulama)
+app.post('/api/customer/orders', (req, res) => {
+    const { phone } = req.body;
+    if (!phone) {
+        return res.status(400).json({ error: 'Lütfen telefon numaranızı girin.' });
+    }
+
+    const cleanInputPhone = phone.replace(/[^0-9]/g, '');
+    if (!cleanInputPhone || cleanInputPhone.length < 7) {
+        return res.status(400).json({ error: 'Geçerli bir telefon numarası giriniz.' });
+    }
+
+    const allOrders = getOrders();
+    const customerOrders = allOrders.filter(o => {
+        const orderPhone = (o.customerPhone || '').replace(/[^0-9]/g, '');
+        return orderPhone && (orderPhone.endsWith(cleanInputPhone) || cleanInputPhone.endsWith(orderPhone));
+    });
+
+    res.json({
+        success: true,
+        phone: cleanInputPhone,
+        orders: customerOrders
+    });
+});
 
 // Middleware: Admin Auth Check
 function requireAdminAuth(req, res, next) {
@@ -525,6 +551,14 @@ app.get('/api/vcard/:id', (req, res) => {
 // HTML Rotaları
 app.get('/order', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'order.html'));
+});
+
+app.get('/my-orders', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'my-orders.html'));
+});
+
+app.get('/siparislerim', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'my-orders.html'));
 });
 
 app.get('/p/:id', (req, res) => {
