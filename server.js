@@ -614,6 +614,10 @@ app.get('/sitemap.xml', (req, res) => {
 });
 
 // HTML Rotaları
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.get('/order', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'order.html'));
 });
