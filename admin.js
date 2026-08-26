@@ -141,10 +141,21 @@ function renderProfilesGrid(profiles) {
 
     profiles.forEach(p => {
         const profileUrl = `${window.location.origin}/p/${p.id}`;
+        const companyBadge = p.company 
+            ? `<div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/40 text-indigo-300 text-xs font-extrabold mb-3 shadow-sm">
+                 <i class="fa-solid fa-building text-indigo-400"></i>
+                 <span class="uppercase tracking-wider truncate">${p.company}</span>
+               </div>`
+            : `<div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 text-xs font-bold mb-3">
+                 <i class="fa-solid fa-id-card text-emerald-400"></i>
+                 <span class="uppercase tracking-wider">NFC KART CNR PROFİLİ</span>
+               </div>`;
+
         const card = document.createElement('div');
         card.className = "glass-card rounded-3xl border border-slate-800 p-6 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300";
         card.innerHTML = `
             <div>
+                ${companyBadge}
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex items-center space-x-3">
                         <img src="${p.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80'}" class="w-12 h-12 rounded-2xl object-cover bg-slate-800 border border-slate-700">
