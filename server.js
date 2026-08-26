@@ -116,7 +116,7 @@ async function sendTelegramNotification(order) {
     const price = order.totalPrice || order.price || '1.000 TL';
     const isKapida = (order.paymentMethod || '').includes('Kapıda');
 
-    const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 NFC KART SİPARİŞİ (${qty} ADET)\n\nSipariş No: ${order.id}\nAdet: ${qty} Adet\nToplam Tutar: ${price}\nÖdeme Yöntemi: ${order.paymentMethod || 'IBAN Havale/EFT'}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}\n\nDurum: ${isKapida ? 'Kapıda Ödeme (Hazırlanacak)' : 'Bekliyor (Ödeme Onayı Bekleniyor)'}`;
+    const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 NFC KART CNR SİPARİŞİ (${qty} ADET)\n\nSipariş No: ${order.id}\nAdet: ${qty} Adet\nToplam Tutar: ${price}\nÖdeme Yöntemi: ${order.paymentMethod || 'IBAN Havale/EFT'}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}\n\nDurum: ${isKapida ? 'Kapıda Ödeme (Hazırlanacak)' : 'Bekliyor (Ödeme Onayı Bekleniyor)'}`;
 
     const replyMarkup = JSON.stringify({
         inline_keyboard: [
@@ -312,6 +312,16 @@ app.post('/api/orders', (req, res) => {
         links.push({ title: 'WhatsApp ile İletişim', url: `https://wa.me/${cleanPhone}`, icon: 'whatsapp' });
     }
 
+    // Özel eklenen custom linkler (Web sitesi, Katalog, vb.)
+    if (Array.isArray(req.body.customLinks)) {
+        req.body.customLinks.forEach(cl => {
+            if (cl.title && cl.url) {
+                const formattedUrl = cl.url.startsWith('http') ? cl.url : `https://${cl.url}`;
+                links.push({ title: cl.title, url: formattedUrl, icon: 'link' });
+            }
+        });
+    }
+
     const ibans = [];
     if (iban) {
         ibans.push({ bank: 'Banka Hesabı', name, iban });
@@ -326,7 +336,7 @@ app.post('/api/orders', (req, res) => {
         phone,
         email: email || '',
         location: `${city || ''} ${district || ''}`.trim(),
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80',
+        avatar: req.body.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80',
         banner: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
         links,
         ibans,
@@ -527,7 +537,7 @@ app.get('/admin', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`====================================================`);
-    console.log(`🚀 NFC KART Sunucusu Çalışıyor!`);
+    console.log(`🚀 NFC KART CNR Sunucusu Çalışıyor!`);
     console.log(`🔑 Admin Şifresi: ${ADMIN_PASSWORD}`);
     console.log(`🤖 Telegram Sabit Bildirim Chat ID: ${DEFAULT_CHAT_ID}`);
     console.log(`====================================================`);

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NFC Kart Siparişi Oluştur - NFC KART</title>
+    <title>NFC Kart Siparişi Oluştur - NFC KART CNR</title>
 
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#4f46e5">
@@ -45,7 +45,7 @@
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
                     <i class="fa-solid fa-wifi text-lg transform rotate-90"></i>
                 </div>
-                <span class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-400">NFC KART</span>
+                <span class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-400">NFC KART CNR</span>
             </a>
             <a href="/" class="text-xs text-slate-400 hover:text-white transition font-semibold flex items-center space-x-1">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Ana Sayfa
@@ -71,6 +71,25 @@
                 <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
                     <div class="w-8 h-8 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center font-bold text-sm">1</div>
                     <h2 class="text-lg font-bold text-white">Kart ve Profil Bilgileriniz</h2>
+                </div>
+
+                <!-- Profil Fotoğrafı / Şirket Logosu Yükleme -->
+                <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 flex items-center space-x-4">
+                    <div class="relative shrink-0">
+                        <img id="avatar-preview-img" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80" class="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-500/50 shadow-md">
+                        <label for="ord-avatar-file" class="absolute -bottom-1 -right-1 w-6 h-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs cursor-pointer shadow-lg" title="Fotoğraf Yükle">
+                            <i class="fa-solid fa-camera"></i>
+                        </label>
+                    </div>
+                    <div class="flex-grow space-y-1">
+                        <label class="block text-xs font-bold text-white">Profil Fotoğrafı veya Şirket Logosu</label>
+                        <p class="text-[11px] text-slate-400">Kartınızın dijital profilinde görünecek vesikalık fotoğrafınızı veya logonuzu seçin.</p>
+                        <input type="file" id="ord-avatar-file" accept="image/*" class="hidden" onchange="handleAvatarFileSelect(event)">
+                        <button type="button" onclick="document.getElementById('ord-avatar-file').click()" class="text-xs bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white px-3 py-1.5 rounded-xl border border-indigo-500/30 transition font-bold inline-flex items-center space-x-1.5 mt-1">
+                            <i class="fa-solid fa-upload text-xs"></i>
+                            <span id="btn-avatar-label">Fotoğraf / Logo Seç</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -117,6 +136,23 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-300 mb-1">IBAN Numarası (Opsiyonel)</label>
                     <input type="text" id="ord-iban" placeholder="TR00 0000 0000 0000 0000 0000 00" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <!-- Ekstra Link / URL Ekleme Alanı -->
+                <div class="border-t border-slate-800/80 pt-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-xs font-bold text-slate-300 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-link text-indigo-400"></i>
+                            <span>Özel Bağlantılar & URL'ler (Web Sitesi, Katalog, Sosyal Medya vb.)</span>
+                        </label>
+                        <button type="button" onclick="addOrderCustomLink()" class="text-xs bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white px-3 py-1.5 rounded-xl border border-indigo-500/30 transition font-bold flex items-center space-x-1">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                            <span>Link / URL Ekle</span>
+                        </button>
+                    </div>
+                    <div id="ord-custom-links-container" class="space-y-2.5">
+                        <!-- Custom links dynamically added here -->
+                    </div>
                 </div>
             </div>
 
@@ -280,7 +316,7 @@
                     <span id="modal-total-badge" class="text-[10px] bg-amber-500/20 px-2.5 py-0.5 rounded-full font-bold">1.000 TL</span>
                 </div>
                 <div class="text-xs text-slate-300 space-y-1 font-mono">
-                    <div><strong>Alıcı Hesabı:</strong> NFC KART / RUKEN</div>
+                    <div><strong>Alıcı Hesabı:</strong> NFC KART CNR / RUKEN</div>
                     <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 my-1">
                         <span id="iban-text-val" class="text-emerald-400 font-bold tracking-wider select-all text-xs">TR00 0000 0000 0000 0000 0000 00</span>
                         <button type="button" onclick="copyToClipboard('TR000000000000000000000000', 'IBAN Kopyalandı!')" class="text-slate-300 hover:text-white bg-slate-800 px-2 py-1 rounded-lg text-xs">
@@ -336,7 +372,7 @@
 
     <!-- Footer -->
     <footer class="border-t border-slate-800 py-6 text-center text-slate-500 text-xs">
-        <p>© 2026 NFC KART - Tüm Hakları Saklıdır.</p>
+        <p>© 2026 NFC KART CNR - Tüm Hakları Saklıdır.</p>
     </footer>
 
     <!-- Form Handler Script -->
@@ -357,6 +393,53 @@
             document.getElementById('btn-submit-text').innerText = `SİPARİŞİ OLUŞTUR (${formattedTotal})`;
         }
 
+        let customLinkCounter = 0;
+
+        function addOrderCustomLink(title = '', url = '') {
+            customLinkCounter++;
+            const container = document.getElementById('ord-custom-links-container');
+            const rowId = `custom-link-row-${customLinkCounter}`;
+            
+            const div = document.createElement('div');
+            div.id = rowId;
+            div.className = 'grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-950 p-2.5 rounded-xl border border-slate-800 animate-fadeIn';
+            div.innerHTML = `
+                <div class="sm:col-span-5">
+                    <input type="text" class="ord-custom-link-title w-full bg-slate-900 border border-slate-700/60 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500" placeholder="Başlık (Örn: Web Sitem, LinkedIn)" value="${title}">
+                </div>
+                <div class="sm:col-span-6">
+                    <input type="url" class="ord-custom-link-url w-full bg-slate-900 border border-slate-700/60 rounded-lg px-3 py-1.5 text-xs font-mono text-emerald-400 placeholder-slate-500 focus:outline-none focus:border-indigo-500" placeholder="https://..." value="${url}">
+                </div>
+                <div class="sm:col-span-1 text-right">
+                    <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-slate-400 hover:text-rose-400 p-1.5 transition text-xs" title="Sil">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        let uploadedAvatarBase64 = null;
+
+        function handleAvatarFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 7 * 1024 * 1024) {
+                showToast("Lütfen 7MB'dan küçük bir fotoğraf seçiniz.", "error");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                uploadedAvatarBase64 = event.target.result;
+                document.getElementById('avatar-preview-img').src = uploadedAvatarBase64;
+                document.getElementById('btn-avatar-label').innerText = 'Fotoğraf Değiştir';
+                showToast("Fotoğraf seçildi! 📸", "success");
+            };
+            reader.readAsDataURL(file);
+        }
+
         async function handleOrderSubmit(e) {
             e.preventDefault();
             
@@ -365,15 +448,28 @@
             
             const totalPriceStr = (currentQuantity * UNIT_PRICE).toLocaleString('tr-TR') + ' TL';
 
+            // Özel eklenen custom linkleri topla
+            const customLinkRows = document.querySelectorAll('#ord-custom-links-container > div');
+            const customLinks = [];
+            customLinkRows.forEach(row => {
+                const titleVal = row.querySelector('.ord-custom-link-title').value.trim();
+                const urlVal = row.querySelector('.ord-custom-link-url').value.trim();
+                if (titleVal && urlVal) {
+                    customLinks.push({ title: titleVal, url: urlVal, icon: 'link' });
+                }
+            });
+
             const payload = {
                 name: document.getElementById('ord-name').value.trim(),
                 title: document.getElementById('ord-title').value.trim(),
                 company: document.getElementById('ord-company').value.trim(),
                 phone: document.getElementById('ord-phone').value.trim(),
                 email: document.getElementById('ord-email').value.trim(),
+                avatar: uploadedAvatarBase64 || '',
                 instagram: document.getElementById('ord-instagram').value.trim(),
                 googleMap: document.getElementById('ord-google').value.trim(),
                 iban: document.getElementById('ord-iban').value.trim(),
+                customLinks: customLinks,
                 cardColor: cardColorEl ? cardColorEl.value : 'Gümüş Metal',
                 paymentMethod: payMethodEl ? payMethodEl.value : 'IBAN Havale/EFT',
                 quantity: currentQuantity,
