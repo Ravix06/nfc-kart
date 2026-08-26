@@ -586,8 +586,31 @@ app.get('/robots.txt', (req, res) => {
     res.send("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/admin/\n\nSitemap: https://nfc-kart.onrender.com/sitemap.xml\n");
 });
 
+const SITEMAP_XML_DATA = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://nfc-kart.onrender.com/</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://nfc-kart.onrender.com/order</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://nfc-kart.onrender.com/siparislerim</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>`;
+
 app.get('/sitemap.xml', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'));
+    res.header('Content-Type', 'application/xml; charset=utf-8');
+    res.send(SITEMAP_XML_DATA);
 });
 
 // HTML Rotaları
