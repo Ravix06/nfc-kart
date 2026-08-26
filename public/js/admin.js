@@ -1,4 +1,5 @@
 let allProfiles = [];
+let allOrders = [];
 let activeNFCUrl = '';
 let adminToken = sessionStorage.getItem('nfs_admin_token') || localStorage.getItem('nfs_admin_token') || '';
 
@@ -31,6 +32,7 @@ function showAdminContent() {
     document.getElementById('login-modal').classList.add('hidden');
     document.getElementById('admin-content').classList.remove('hidden');
     loadAdminProfiles();
+    loadAdminOrders();
 }
 
 async function handleLoginSubmit(e) {
@@ -73,15 +75,42 @@ function logoutAdmin() {
     showLoginModal();
 }
 
-// Global fetch helper with Admin Authorization header
 async function authFetch(url, options = {}) {
     options.headers = options.headers || {};
     options.headers['x-admin-password'] = adminToken;
-    return fetch(url, options);
+    const res = await fetch(url, options);
+    if (res.status === 401) {
+        logoutAdmin();
+    }
+    return res;
 }
 
 /* ======================================================
-   Kart Profilleri Yükleme ve Arayüz İşlemleri
+   Tab Değiştirme
+   ====================================================== */
+function switchAdminTab(tabName) {
+    const pTab = document.getElementById('tab-content-profiles');
+    const oTab = document.getElementById('tab-content-orders');
+    const pBtn = document.getElementById('tab-btn-profiles');
+    const oBtn = document.getElementById('tab-btn-orders');
+
+    if (tabName === 'profiles') {
+        pTab.classList.remove('hidden');
+        oTab.classList.add('hidden');
+        pBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-md';
+        oBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white flex items-center';
+        loadAdminProfiles();
+    } else {
+        pTab.classList.add('hidden');
+        oTab.classList.remove('hidden');
+        pBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white';
+        oBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-md flex items-center';
+        loadAdminOrders();
+    }
+}
+
+/* ======================================================
+   Kart Profilleri İşlemleri
    ====================================================== */
 async function loadAdminProfiles() {
     try {
@@ -91,12 +120,12 @@ async function loadAdminProfiles() {
         document.getElementById('stat-total-cards').innerText = allProfiles.length;
     } catch (err) {
         console.error("Profiller yüklenemedi:", err);
-        showToast("Profiller yüklenirken hata oluştu!", "error");
     }
 }
 
 function renderProfilesGrid(profiles) {
-    const grid = document.getElementById('profiles-grid');
+    const grid = document.getElementById('profiles-grid') || document.getElementById('tab-content-profiles');
+    if (!grid) return;
     grid.innerHTML = '';
 
     if (profiles.length === 0) {
@@ -112,10 +141,21 @@ function renderProfilesGrid(profiles) {
 
     profiles.forEach(p => {
         const profileUrl = `${window.location.origin}/p/${p.id}`;
+        const companyBadge = p.company 
+            ? `<div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/40 text-indigo-300 text-xs font-extrabold mb-3 shadow-sm">
+                 <i class="fa-solid fa-building text-indigo-400"></i>
+                 <span class="uppercase tracking-wider truncate">${p.company}</span>
+               </div>`
+            : `<div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 text-xs font-bold mb-3">
+                 <i class="fa-solid fa-id-card text-emerald-400"></i>
+                 <span class="uppercase tracking-wider">NFC KART CNR PROFİLİ</span>
+               </div>`;
+
         const card = document.createElement('div');
         card.className = "glass-card rounded-3xl border border-slate-800 p-6 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300";
         card.innerHTML = `
             <div>
+                ${companyBadge}
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex items-center space-x-3">
                         <img src="${p.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80'}" class="w-12 h-12 rounded-2xl object-cover bg-slate-800 border border-slate-700">
@@ -164,6 +204,133 @@ function renderProfilesGrid(profiles) {
         `;
         grid.appendChild(card);
     });
+}
+
+/* ======================================================
+   📦 Gelen Müşteri Siparişleri ve Teslimat Adresleri
+   ====================================================== */
+async function loadAdminOrders() {
+    try {
+        const response = await authFetch('/api/orders');
+        if (response.ok) {
+            allOrders = await response.json();
+            renderOrdersList(allOrders);
+            document.getElementById('stat-total-orders').innerText = allOrders.length;
+        }
+        
+        // Kart Profilleri sayacını da senkronize et
+        const pRes = await fetch('/api/profiles');
+        if (pRes.ok) {
+            const profs = await pRes.json();
+            const statEl = document.getElementById('stat-total-cards');
+            if (statEl) statEl.innerText = profs.length;
+        }
+    } catch (err) {
+        console.error("Siparişler yüklenemedi:", err);
+    }
+}
+
+function renderOrdersList(orders) {
+    const container = document.getElementById('orders-list-container');
+    container.innerHTML = '';
+
+    if (orders.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-16 glass-card rounded-3xl border border-slate-800">
+                <i class="fa-solid fa-box-open text-4xl text-slate-600 mb-3"></i>
+                <h3 class="text-lg font-bold text-slate-300">Henüz Kayıtlı Sipariş Yok</h3>
+                <p class="text-sm text-slate-500 mt-1">Müşterileriniz sipariş verdiğinde işletme isimleri ve kargo adresleri burada kaydolacaktır.</p>
+            </div>
+        `;
+        return;
+    }
+
+    orders.forEach(ord => {
+        const isCompleted = (ord.status || '').includes('Tamamlandı') || (ord.status || '').includes('Kargolandı');
+        const statusClass = isCompleted 
+            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' 
+            : ((ord.status || '').includes('Onaylandı') ? 'bg-sky-500/20 text-sky-400 border-sky-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30');
+
+        const companyText = ord.company ? `<span class="bg-indigo-600/30 text-indigo-300 font-bold px-2.5 py-0.5 rounded-lg border border-indigo-500/30 ml-2"><i class="fa-solid fa-building mr-1"></i>${ord.company}</span>` : '';
+
+        const div = document.createElement('div');
+        div.className = `glass-card p-6 rounded-3xl border ${isCompleted ? 'border-emerald-500/20 bg-slate-950/40' : 'border-slate-800'} flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-amber-500/30 transition`;
+        div.innerHTML = `
+            <div class="space-y-3 flex-grow">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="bg-amber-500/20 text-amber-300 font-mono text-xs px-2.5 py-1 rounded-lg border border-amber-500/30 font-bold">${ord.id}</span>
+                    <h3 class="text-lg font-extrabold text-white">${ord.customerName}</h3>
+                    ${companyText}
+                    <span class="text-xs bg-slate-800 text-indigo-300 px-3 py-1 rounded-full font-semibold border border-slate-700">${ord.cardColor || 'Gümüş Metal'}</span>
+                    <span class="text-xs font-bold px-3 py-1 rounded-full border ${statusClass}">${ord.status || 'Bekliyor'}</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300">
+                    <div><i class="fa-solid fa-phone text-emerald-400 mr-2"></i><strong>Telefon:</strong> ${ord.customerPhone}</div>
+                    <div><i class="fa-solid fa-tag text-amber-400 mr-2"></i><strong>Sipariş Adedi & Tutarı:</strong> ${ord.quantity || 1} Adet - <strong class="text-amber-400 font-bold">${ord.totalPrice || ord.price || '1.000 TL'}</strong> (${ord.paymentMethod || 'Havale/EFT'})</div>
+                    <div class="col-span-full"><i class="fa-solid fa-location-dot text-rose-400 mr-2"></i><strong>Teslimat Adresi:</strong> ${ord.city} / ${ord.district} - ${ord.address}</div>
+                    ${ord.note ? `<div class="col-span-full italic text-amber-300 bg-slate-950 p-2 rounded-xl border border-slate-800"><i class="fa-solid fa-comment mr-2"></i>Not: ${ord.note}</div>` : ''}
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center gap-2 shrink-0 border-t md:border-t-0 md:border-l border-slate-800 pt-4 md:pt-0 md:pl-6">
+                <button onclick="openNFCModal('${ord.profileId}')" class="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-wifi transform rotate-90"></i>
+                    <span>NFC Karta Bas</span>
+                </button>
+                ${!isCompleted ? `
+                    <button onclick="completeOrder('${ord.id}')" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow-lg shadow-emerald-600/20">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Tamamlandı Olarak Kaydet</span>
+                    </button>
+                ` : `
+                    <span class="text-xs text-emerald-400 font-bold px-3 py-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20 flex items-center space-x-1">
+                        <i class="fa-solid fa-check-double"></i>
+                        <span>Kargolandı / Tamamlandı</span>
+                    </span>
+                `}
+                <button onclick="deleteOrder('${ord.id}')" title="Arşivden Sil" class="px-3 py-2 glass-card hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 rounded-xl text-xs transition border border-slate-800">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+async function completeOrder(id) {
+    try {
+        const res = await authFetch(`/api/orders/${id}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'Tamamlandı / Kargolandı' })
+        });
+        if (res.ok) {
+            showToast('Sipariş tamamlandı olarak kaydedildi ve Kart Profillerine eklendi! 🎉', 'success');
+            loadAdminOrders();
+            loadAdminProfiles();
+        } else {
+            showToast('Durum güncellenemedi', 'error');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function deleteOrder(id) {
+    if (!confirm('Bu sipariş kaydını tamamen silmek istediğinize emin misiniz?')) return;
+
+    try {
+        const res = await authFetch(`/api/orders/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            showToast('Sipariş kaydı tamamen silindi', 'success');
+            loadAdminOrders();
+        } else {
+            showToast('Silinemedi', 'error');
+        }
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 /* ⚡ Hızlı Müşteri Oluşturma Sihirbazı */
