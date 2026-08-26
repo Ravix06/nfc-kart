@@ -363,7 +363,7 @@ app.post('/api/orders', (req, res) => {
         email: email || '',
         location: `${city || ''} ${district || ''}`.trim(),
         avatar: req.body.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80',
-        banner: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+        banner: req.body.banner || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
         links,
         ibans,
         views: 0,

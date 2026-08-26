@@ -73,23 +73,47 @@
                     <h2 class="text-lg font-bold text-white">Kart ve Profil Bilgileriniz</h2>
                 </div>
 
-                <!-- Profil Fotoğrafı / Şirket Logosu Yükleme -->
-                <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 flex items-center space-x-4">
-                    <div class="relative shrink-0">
-                        <img id="avatar-preview-img" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80" class="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-500/50 shadow-md">
-                        <label for="ord-avatar-file" class="absolute -bottom-1 -right-1 w-6 h-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs cursor-pointer shadow-lg" title="Fotoğraf Yükle">
-                            <i class="fa-solid fa-camera"></i>
-                        </label>
+                <!-- Fotoğraf & Arka Plan Yükleme 2'li Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <!-- 1. Profil Fotoğrafı / Şirket Logosu -->
+                    <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 flex items-center space-x-4">
+                        <div class="relative shrink-0">
+                            <img id="avatar-preview-img" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80" class="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-500/50 shadow-md">
+                            <label for="ord-avatar-file" class="absolute -bottom-1 -right-1 w-6 h-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs cursor-pointer shadow-lg" title="Fotoğraf Yükle">
+                                <i class="fa-solid fa-camera"></i>
+                            </label>
+                        </div>
+                        <div class="flex-grow space-y-1">
+                            <label class="block text-xs font-bold text-white">Profil Fotoğrafı / Logo</label>
+                            <p class="text-[11px] text-slate-400">Profilinizin ana fotoğrafını seçin.</p>
+                            <input type="file" id="ord-avatar-file" accept="image/*" class="hidden" onchange="handleAvatarFileSelect(event)">
+                            <button type="button" onclick="document.getElementById('ord-avatar-file').click()" class="text-xs bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white px-3 py-1 rounded-xl border border-indigo-500/30 transition font-bold inline-flex items-center space-x-1.5 mt-1">
+                                <i class="fa-solid fa-upload text-xs"></i>
+                                <span id="btn-avatar-label">Fotoğraf Seç</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex-grow space-y-1">
-                        <label class="block text-xs font-bold text-white">Profil Fotoğrafı veya Şirket Logosu</label>
-                        <p class="text-[11px] text-slate-400">Kartınızın dijital profilinde görünecek vesikalık fotoğrafınızı veya logonuzu seçin.</p>
-                        <input type="file" id="ord-avatar-file" accept="image/*" class="hidden" onchange="handleAvatarFileSelect(event)">
-                        <button type="button" onclick="document.getElementById('ord-avatar-file').click()" class="text-xs bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white px-3 py-1.5 rounded-xl border border-indigo-500/30 transition font-bold inline-flex items-center space-x-1.5 mt-1">
-                            <i class="fa-solid fa-upload text-xs"></i>
-                            <span id="btn-avatar-label">Fotoğraf / Logo Seç</span>
-                        </button>
+
+                    <!-- 2. Arka Plan / Kapak Fotoğrafı -->
+                    <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 flex items-center space-x-4">
+                        <div class="relative shrink-0">
+                            <img id="banner-preview-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80" class="w-24 h-16 rounded-2xl object-cover border-2 border-purple-500/50 shadow-md">
+                            <label for="ord-banner-file" class="absolute -bottom-1 -right-1 w-6 h-6 bg-purple-600 hover:bg-purple-500 text-white rounded-full flex items-center justify-center text-xs cursor-pointer shadow-lg" title="Kapak Yükle">
+                                <i class="fa-solid fa-image"></i>
+                            </label>
+                        </div>
+                        <div class="flex-grow space-y-1">
+                            <label class="block text-xs font-bold text-white">Arka Plan / Kapak Görseli</label>
+                            <p class="text-[11px] text-slate-400">Profilin üst kapak arka plan resmini seçin.</p>
+                            <input type="file" id="ord-banner-file" accept="image/*" class="hidden" onchange="handleBannerFileSelect(event)">
+                            <button type="button" onclick="document.getElementById('ord-banner-file').click()" class="text-xs bg-purple-600/30 hover:bg-purple-600 text-purple-300 hover:text-white px-3 py-1 rounded-xl border border-purple-500/30 transition font-bold inline-flex items-center space-x-1.5 mt-1">
+                                <i class="fa-solid fa-upload text-xs"></i>
+                                <span id="btn-banner-label">Arka Plan Seç</span>
+                            </button>
+                        </div>
                     </div>
+
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -461,6 +485,41 @@
             reader.readAsDataURL(file);
         }
 
+        let uploadedBannerBase64 = null;
+
+        function handleBannerFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1200;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    uploadedBannerBase64 = canvas.toDataURL('image/jpeg', 0.85);
+                    document.getElementById('banner-preview-img').src = uploadedBannerBase64;
+                    document.getElementById('btn-banner-label').innerText = 'Arka Plan Değiştir';
+                    showToast("Arka plan kapak resmi seçildi ve optimize edildi! 🖼️", "success");
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
         async function handleOrderSubmit(e) {
             e.preventDefault();
             
@@ -487,6 +546,7 @@
                 phone: document.getElementById('ord-phone').value.trim(),
                 email: document.getElementById('ord-email').value.trim(),
                 avatar: uploadedAvatarBase64 || '',
+                banner: uploadedBannerBase64 || '',
                 instagram: document.getElementById('ord-instagram').value.trim(),
                 googleMap: document.getElementById('ord-google').value.trim(),
                 iban: document.getElementById('ord-iban').value.trim(),
