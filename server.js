@@ -968,6 +968,24 @@ app.get('/p/:id', (req, res) => {
     res.sendFile(pubProf);
 });
 
+app.get('/', (req, res) => {
+    const rootIndex = path.join(__dirname, 'index.html');
+    const pubIndex = path.join(__dirname, 'public', 'index.html');
+    if (fs.existsSync(rootIndex)) {
+        try {
+            const rootContent = fs.readFileSync(rootIndex, 'utf8');
+            if (rootContent.includes('İşletme Randevu Girişi')) return res.sendFile(rootIndex);
+        } catch(e) {}
+    }
+    if (fs.existsSync(pubIndex)) {
+        try {
+            const pubContent = fs.readFileSync(pubIndex, 'utf8');
+            if (pubContent.includes('İşletme Randevu Girişi')) return res.sendFile(pubIndex);
+        } catch(e) {}
+    }
+    res.sendFile(pubIndex);
+});
+
 app.get('/js/admin.js', (req, res) => {
     const rootJs = path.join(__dirname, 'admin.js');
     const pubJs = path.join(__dirname, 'public', 'js', 'admin.js');
