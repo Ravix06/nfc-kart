@@ -117,28 +117,28 @@ async function syncToCloudBackup(key, data) {
     } catch(e) {}
 }
 
-// Helpers: Read / Save Profiles
+let inMemoryProfiles = [];
+
 function getProfiles() {
     try {
-        if (!fs.existsSync(DATA_FILE)) {
-            const dataDir = path.dirname(DATA_FILE);
-            if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            fs.writeFileSync(DATA_FILE, '[]', 'utf8');
-            return [];
+        if (fs.existsSync(DATA_FILE)) {
+            const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8') || '[]');
+            if (Array.isArray(data) && data.length > 0) return data;
         }
-        return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8') || '[]');
+        if (Array.isArray(inMemoryProfiles) && inMemoryProfiles.length > 0) return inMemoryProfiles;
+        return [];
     } catch (err) {
         console.error("Profiles okuma hatası:", err);
-        return [];
+        return inMemoryProfiles || [];
     }
 }
 
 function saveProfiles(profiles) {
     try {
+        inMemoryProfiles = profiles;
         const dataDir = path.dirname(DATA_FILE);
         if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
         fs.writeFileSync(DATA_FILE, JSON.stringify(profiles, null, 2), 'utf8');
-        syncToCloudBackup('profiles', profiles);
     } catch (err) {
         console.error("Profiles kaydetme hatası:", err);
     }
@@ -1148,6 +1148,13 @@ app.get('/admin', (req, res) => {
     }
     res.sendFile(pubAdmin);
 });
+
+// Auto Keep-Alive Ping (Sunucuyu 24 saat 7 gün boyunca UYANIK tutar, rölantiye girmesini engeller)
+setInterval(() => {
+    try {
+        fetch('https://nfc-kart.onrender.com/api/profiles').catch(() => {});
+    } catch(e) {}
+}, 10 * 60 * 1000);
 
 app.listen(PORT, () => {
     console.log(`====================================================`);
