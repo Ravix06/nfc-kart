@@ -9,6 +9,8 @@ const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'data', 'profiles.json');
 const ORDERS_FILE = path.join(__dirname, 'data', 'orders.json');
 const CHATS_FILE = path.join(__dirname, 'data', 'telegram_chats.json');
+const APPOINTMENTS_FILE = path.join(__dirname, 'data', 'appointments.json');
+const BUSINESS_ACCOUNTS_FILE = path.join(__dirname, 'data', 'business_accounts.json');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Ruken.12';
 
 // TELEGRAM BOT CONFIGURATION (@nfc_kart_siparis_bot)
@@ -97,6 +99,40 @@ function saveOrders(orders) {
     }
 }
 
+function getAppointments() {
+    try {
+        if (!fs.existsSync(APPOINTMENTS_FILE)) return [];
+        return JSON.parse(fs.readFileSync(APPOINTMENTS_FILE, 'utf8') || '[]');
+    } catch (err) {
+        return [];
+    }
+}
+
+function saveAppointments(apps) {
+    try {
+        const dataDir = path.dirname(APPOINTMENTS_FILE);
+        if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+        fs.writeFileSync(APPOINTMENTS_FILE, JSON.stringify(apps, null, 2), 'utf8');
+    } catch (err) {}
+}
+
+function getBusinessAccounts() {
+    try {
+        if (!fs.existsSync(BUSINESS_ACCOUNTS_FILE)) return [];
+        return JSON.parse(fs.readFileSync(BUSINESS_ACCOUNTS_FILE, 'utf8') || '[]');
+    } catch (err) {
+        return [];
+    }
+}
+
+function saveBusinessAccounts(accs) {
+    try {
+        const dataDir = path.dirname(BUSINESS_ACCOUNTS_FILE);
+        if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+        fs.writeFileSync(BUSINESS_ACCOUNTS_FILE, JSON.stringify(accs, null, 2), 'utf8');
+    } catch (err) {}
+}
+
 // ONAYLANAN SİPARİŞİ OTOMATİK "KART PROFİLLERİ"NE AKTARAN YARDIMCI
 function activateOrderProfile(order) {
     if (!order || !order.draftProfile) return false;
@@ -105,15 +141,39 @@ function activateOrderProfile(order) {
     const existingIndex = profiles.findIndex(p => p.id === order.draftProfile.id);
     if (existingIndex !== -1) {
         profiles[existingIndex] = { ...profiles[existingIndex], ...order.draftProfile };
-        saveProfiles(profiles);
-        console.log(`✅ PROFİL GÜNCELLENDİ & AKTİF: ${order.draftProfile.name} -> Kart Profillerinde Güncellendi!`);
-        return true;
     } else {
         profiles.push(order.draftProfile);
-        saveProfiles(profiles);
-        console.log(`✅ PROFİL AKTİF EDİLDİ: ${order.draftProfile.name} -> Kart Profillerine Eklendi!`);
-        return true;
     }
+    saveProfiles(profiles);
+
+    // Eğer Randevu Sistemi Paketi satın alındıysa İşletmeye Özel Randevu Hesabını Otomatik Oluştur!
+    if (order.hasAppointmentSystem || order.appointmentBusinessName) {
+        const accs = getBusinessAccounts();
+        const bName = order.appointmentBusinessName || order.company || order.customerName;
+        const bPass = order.appointmentPassword || '123456';
+        const existingAccIdx = accs.findIndex(a => a.profileId === order.profileId || (a.businessName && a.businessName.toLowerCase() === bName.toLowerCase()));
+        
+        const accData = {
+            id: `acc-${Date.now().toString().slice(-4)}`,
+            profileId: order.profileId,
+            businessName: bName,
+            password: bPass,
+            phone: order.customerPhone,
+            hasAppointmentSystem: true,
+            createdAt: new Date().toISOString()
+        };
+
+        if (existingAccIdx !== -1) {
+            accs[existingAccIdx] = { ...accs[existingAccIdx], ...accData };
+        } else {
+            accs.push(accData);
+        }
+        saveBusinessAccounts(accs);
+        console.log(`📅 İŞLETME RANDEVU HESABI AKTİF EDİLDİ: ${bName} (Şifre: ${bPass})`);
+    }
+
+    console.log(`✅ PROFİL AKTİF EDİLDİ: ${order.draftProfile.name} -> Kart Profillerine Eklendi!`);
+    return true;
 }
 
 // TÜM TAMAMLANGAN/ONAYLANGAN SİPARİŞLERİ SİSTEM BAŞLANGICINDA OTOMATİK TARAYIP KART PROFİLLERİNE AKTARAN FONKSİYON
@@ -401,7 +461,9 @@ app.post('/api/orders', (req, res) => {
     // Save Order (Draft Profile ile birlikte)
     const orders = getOrders();
     const qty = parseInt(req.body.quantity) || 1;
-    const totalPriceCalc = req.body.totalPrice || req.body.price || `${(qty * 700).toLocaleString('tr-TR')} TL`;
+    const hasAppSys = req.body.hasAppointmentSystem === true || req.body.hasAppointmentSystem === 'true';
+    const appAddon = hasAppSys ? 300 : 0;
+    const totalPriceCalc = req.body.totalPrice || req.body.price || `${((qty * 700) + appAddon).toLocaleString('tr-TR')} TL`;
 
     const newOrder = {
         id: `siparis-${Date.now().toString().slice(-4)}`,
@@ -420,6 +482,9 @@ app.post('/api/orders', (req, res) => {
         cardColor: cardColor || 'Gümüş Metal',
         profileId: finalId,
         profileName: name,
+        hasAppointmentSystem: hasAppSys,
+        appointmentBusinessName: req.body.appointmentBusinessName || company || name,
+        appointmentPassword: req.body.appointmentPassword || '123456',
         draftProfile: draftProfile,
         status: 'Bekliyor (Ödeme Onayı Bekleniyor)',
         createdAt: new Date().toISOString()
@@ -439,9 +504,114 @@ app.post('/api/orders', (req, res) => {
     });
 });
 
+// ======================================================
+// 📅 İŞLETME ÖZEL RANDEVU KANALI VE LOGİN API'LERİ
+// ======================================================
+
+// API: İşletme Özel Randevu Paneli Girişi
+app.post('/api/business/login', (req, res) => {
+    const { businessName, password } = req.body;
+    if (!businessName || !password) {
+        return res.status(400).json({ error: 'İşletme adı ve şifre gereklidir.' });
+    }
+
+    const accs = getBusinessAccounts();
+    const cleanBName = businessName.trim().toLowerCase();
+    const cleanPass = password.trim();
+
+    const account = accs.find(a => 
+        (a.businessName && a.businessName.trim().toLowerCase() === cleanBName) ||
+        (a.profileId && a.profileId.toLowerCase() === cleanBName)
+    );
+
+    if (!account || account.password !== cleanPass) {
+        return res.status(401).json({ error: 'İşletme adı veya şifre hatalı!' });
+    }
+
+    res.json({
+        success: true,
+        message: 'Giriş başarılı!',
+        account: {
+            id: account.id,
+            profileId: account.profileId,
+            businessName: account.businessName,
+            phone: account.phone
+        }
+    });
+});
+
+// API: İşletmeye Özel Randevuları Getir
+app.get('/api/business/appointments/:profileId', (req, res) => {
+    const apps = getAppointments();
+    const profileId = req.params.profileId;
+    const businessApps = apps.filter(a => a.profileId === profileId || a.businessName === profileId);
+    res.json(businessApps);
+});
+
+// API: Müşteri Tarafından Randevu Oluşturma (Kart Profili /p/:id Üzerinden)
+app.post('/api/appointments', (req, res) => {
+    const { profileId, businessName, customerName, customerPhone, date, time, note } = req.body;
+    if (!profileId || !customerName || !customerPhone || !date || !time) {
+        return res.status(400).json({ error: 'Lütfen tüm randevu bilgilerini doldurun.' });
+    }
+
+    const apps = getAppointments();
+    const newApp = {
+        id: `randevu-${Date.now().toString().slice(-4)}`,
+        profileId,
+        businessName: businessName || 'İşletme',
+        customerName,
+        customerPhone,
+        date,
+        time,
+        note: note || '',
+        status: 'Bekliyor',
+        createdAt: new Date().toISOString()
+    };
+
+    apps.unshift(newApp);
+    saveAppointments(apps);
+
+    // Telegram Botuna Anlık Randevu Bildirimi Gönder
+    const notifyMsg = `📅 YENİ RANDEVU TALEBİ! 📅\n\nİşletme: ${businessName || profileId}\nMüşteri: ${customerName}\nTelefon: ${customerPhone}\nTarih & Saat: ${date} - ${time}\nNot: ${note || 'Yok'}`;
+    try {
+        cachedChatIds.forEach(chatId => {
+            const payload = JSON.stringify({ chat_id: chatId, text: notifyMsg });
+            const req = https.request(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) }
+            });
+            req.on('error', () => {});
+            req.write(payload);
+            req.end();
+        });
+    } catch(e) {}
+
+    res.status(201).json({ success: true, message: 'Randevunuz oluşturuldu!', appointment: newApp });
+});
+
+// API: İşletmenin Randevu Durumunu Güncellemesi (Onayla / İptal)
+app.put('/api/business/appointments/:id/status', (req, res) => {
+    let apps = getAppointments();
+    const appItem = apps.find(a => a.id === req.params.id);
+    if (!appItem) return res.status(404).json({ error: 'Randevu bulunamadı' });
+
+    appItem.status = req.body.status || 'Onaylandı';
+    saveAppointments(apps);
+    res.json({ success: true, message: 'Randevu durumu güncellendi', appointment: appItem });
+});
+
 // API: Siparişleri Getir
 app.get('/api/orders', requireAdminAuth, (req, res) => {
     res.json(getOrders());
+});
+
+// API: Admin Paneli Tüm Aktif Randevu Sistemleri Özeti
+app.get('/api/admin/appointments-summary', requireAdminAuth, (req, res) => {
+    res.json({
+        businessAccounts: getBusinessAccounts(),
+        appointments: getAppointments()
+    });
 });
 
 // API: Genel Sipariş Onay Durumu Kontrolü (Müşteri Canlı Ekranı İçin)

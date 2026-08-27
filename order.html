@@ -277,6 +277,35 @@
                             <button type="button" onclick="changeQuantity(1)" class="w-8 h-8 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold flex items-center justify-center border border-slate-700 transition">
                                 <i class="fa-solid fa-plus text-xs"></i>
                             </button>
+                    </div>
+                </div>
+
+                <!-- Randevu Sistemi Ek Paket Kutusu (+300 TL) -->
+                <div class="bg-slate-950 p-5 rounded-2xl border border-indigo-500/30 space-y-4">
+                    <label class="flex items-start space-x-3 cursor-pointer select-none">
+                        <input type="checkbox" id="ord-has-appointment" onchange="toggleAppointmentPackage()" class="w-5 h-5 rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500 shrink-0 mt-0.5">
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm font-extrabold text-white">📅 Akıllı Online Randevu Sistemi Paketi</span>
+                                <span class="text-xs bg-indigo-500/20 text-indigo-300 font-bold px-2 py-0.5 rounded-full border border-indigo-500/30">+300 TL</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                                Bu özellik aktif edildiğinde dijital profilinizde müşterilerinizin gün ve saat seçebildiği randevu modali açılır. Müşteri gün/saat seçtiğinde detaylar WhatsApp üzerinden size otomatik iletilir. İsterseniz işletme adınız ve belirlediğiniz şifre ile kendi özel Randevu Panelinize giriş yapıp randevularınızı yönetebilirsiniz.
+                            </p>
+                        </div>
+                    </label>
+
+                    <!-- Dynamically Shown Input Fields for Business Name & Password -->
+                    <div id="appointment-fields-container" class="hidden pt-3 border-t border-slate-800 space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-300 mb-1">İşletme Adınız / Ünvanı *</label>
+                                <input type="text" id="ord-app-business-name" placeholder="Örn: Yalçın Erkek Kuaförü" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-300 mb-1">Özel Randevu Paneli Şifreniz *</label>
+                                <input type="text" id="ord-app-password" placeholder="Örn: Berber.123" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -402,17 +431,34 @@
         let currentQuantity = 1;
         const UNIT_PRICE = 700;
 
-        function changeQuantity(delta) {
-            currentQuantity += delta;
-            if (currentQuantity < 1) currentQuantity = 1;
-            if (currentQuantity > 50) currentQuantity = 50;
-
-            const total = currentQuantity * UNIT_PRICE;
+        function updateTotalPrice() {
+            const hasApp = document.getElementById('ord-has-appointment')?.checked || false;
+            const appAddon = hasApp ? 300 : 0;
+            const total = (currentQuantity * UNIT_PRICE) + appAddon;
             const formattedTotal = total.toLocaleString('tr-TR') + ' TL';
 
             document.getElementById('quantity-display').innerText = currentQuantity;
             document.getElementById('total-price-display').innerText = formattedTotal;
             document.getElementById('btn-submit-text').innerText = `SİPARİŞİ OLUŞTUR (${formattedTotal})`;
+        }
+
+        function changeQuantity(delta) {
+            currentQuantity += delta;
+            if (currentQuantity < 1) currentQuantity = 1;
+            if (currentQuantity > 50) currentQuantity = 50;
+
+            updateTotalPrice();
+        }
+
+        function toggleAppointmentPackage() {
+            const hasApp = document.getElementById('ord-has-appointment')?.checked || false;
+            const container = document.getElementById('appointment-fields-container');
+            if (hasApp) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+            updateTotalPrice();
         }
 
         let customLinkCounter = 0;
@@ -524,7 +570,9 @@
             const cardColorEl = document.querySelector('input[name="cardColor"]:checked');
             const payMethodEl = document.querySelector('input[name="paymentMethod"]:checked');
             
-            const totalPriceStr = (currentQuantity * UNIT_PRICE).toLocaleString('tr-TR') + ' TL';
+            const hasAppSys = document.getElementById('ord-has-appointment')?.checked || false;
+            const appAddon = hasAppSys ? 300 : 0;
+            const totalPriceStr = ((currentQuantity * UNIT_PRICE) + appAddon).toLocaleString('tr-TR') + ' TL';
 
             // Özel eklenen custom linkleri topla
             const customLinkRows = document.querySelectorAll('#ord-custom-links-container > div');
@@ -554,6 +602,9 @@
                 quantity: currentQuantity,
                 totalPrice: totalPriceStr,
                 price: totalPriceStr,
+                hasAppointmentSystem: hasAppSys,
+                appointmentBusinessName: document.getElementById('ord-app-business-name')?.value.trim() || document.getElementById('ord-company').value.trim(),
+                appointmentPassword: document.getElementById('ord-app-password')?.value.trim() || '123456',
                 city: document.getElementById('ord-city').value.trim(),
                 district: document.getElementById('ord-district').value.trim(),
                 address: document.getElementById('ord-address').value.trim(),

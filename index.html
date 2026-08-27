@@ -517,5 +517,189 @@
     <footer class="border-t border-slate-800/80 py-8 text-center text-slate-500 text-xs bg-slate-950">
         <p>© 2026 NFC KART CNR - Tüm Hakları Saklıdır.</p>
     </footer>
+
+    <!-- Floating Bottom-Right Business Appointment Portal Widget -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button onclick="openBusinessLoginModal()" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold px-4 py-3 rounded-full shadow-2xl border border-indigo-400/40 flex items-center space-x-2 text-xs transition transform hover:scale-105">
+            <i class="fa-solid fa-calendar-check text-sm text-amber-300 animate-pulse"></i>
+            <span>İşletme Randevu Girişi</span>
+        </button>
+    </div>
+
+    <!-- Modal 1: İşletme Randevu Paneli Giriş Modalı -->
+    <div id="biz-login-modal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-7 shadow-2xl relative">
+            <button onclick="closeBusinessLoginModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-2xl mx-auto mb-3 border border-indigo-500/30">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <h3 class="text-xl font-black text-white">İşletme Randevu Paneli</h3>
+                <p class="text-xs text-slate-400 mt-1">İşletme adınızı ve siparişte oluşturduğunuz şifreyi girin.</p>
+            </div>
+
+            <form onsubmit="handleBusinessLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">İşletme Adınız</label>
+                    <input type="text" id="biz-login-name" required placeholder="Örn: Yalçın Erkek Kuaförü" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Şifreniz</label>
+                    <input type="password" id="biz-login-pass" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <p id="biz-login-error" class="text-xs text-rose-400 font-semibold hidden text-center"></p>
+                <button type="submit" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-sm transition shadow-lg shadow-indigo-600/30">
+                    Randevu Panelime Giriş Yap
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Özel İşletme Randevu Paneli -->
+    <div id="biz-panel-modal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 hidden overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl relative my-8">
+            <button onclick="closeBusinessPanelModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+                <div>
+                    <span id="biz-panel-title" class="text-lg font-black text-white block">İşletme Randevu Paneli</span>
+                    <span id="biz-panel-sub" class="text-xs text-indigo-400 font-semibold">Gelen Müşteri Randevularınız</span>
+                </div>
+                <button onclick="closeBusinessPanelModal()" class="text-xs bg-rose-500/20 text-rose-300 border border-rose-500/30 px-3 py-1.5 rounded-xl font-bold">
+                    Çıkış Yap
+                </button>
+            </div>
+
+            <div id="biz-appointments-container" class="space-y-3">
+                <!-- Appointments dynamically loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentBizAccount = null;
+
+        function openBusinessLoginModal() {
+            document.getElementById('biz-login-modal').classList.remove('hidden');
+        }
+        function closeBusinessLoginModal() {
+            document.getElementById('biz-login-modal').classList.add('hidden');
+        }
+        function closeBusinessPanelModal() {
+            document.getElementById('biz-panel-modal').classList.add('hidden');
+        }
+
+        async function handleBusinessLogin(e) {
+            e.preventDefault();
+            const bName = document.getElementById('biz-login-name').value.trim();
+            const bPass = document.getElementById('biz-login-pass').value.trim();
+            const errEl = document.getElementById('biz-login-error');
+            errEl.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/business/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ businessName: bName, password: bPass })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    errEl.innerText = data.error || 'Giriş başarısız';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+
+                currentBizAccount = data.account;
+                closeBusinessLoginModal();
+                openBusinessPanel(data.account);
+            } catch (err) {
+                errEl.innerText = 'Sunucuya bağlanılamadı.';
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        async function openBusinessPanel(acc) {
+            document.getElementById('biz-panel-title').innerText = acc.businessName;
+            document.getElementById('biz-panel-modal').classList.remove('hidden');
+            loadBusinessAppointments(acc.profileId);
+        }
+
+        async function loadBusinessAppointments(profileId) {
+            const container = document.getElementById('biz-appointments-container');
+            container.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs font-semibold">Randevular yükleniyor...</div>';
+
+            try {
+                const res = await fetch(`/api/business/appointments/${profileId}`);
+                const apps = await res.json();
+
+                if (apps.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-12 bg-slate-950 rounded-2xl border border-slate-800">
+                            <i class="fa-solid fa-calendar-xmark text-3xl text-slate-600 mb-2"></i>
+                            <p class="text-xs font-bold text-slate-400">Henüz Bekleyen Randevu Talebiniz Yok</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = '';
+                apps.forEach(a => {
+                    const isApproved = a.status === 'Onaylandı';
+                    const div = document.createElement('div');
+                    div.className = 'bg-slate-950 p-4 rounded-2xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3';
+                    div.innerHTML = `
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm font-bold text-white">${a.customerName}</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${isApproved ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">${a.status}</span>
+                            </div>
+                            <div class="text-xs text-slate-400 mt-1 flex items-center space-x-3">
+                                <span><i class="fa-solid fa-calendar text-indigo-400 mr-1"></i>${a.date} - ${a.time}</span>
+                                <span><i class="fa-solid fa-phone text-emerald-400 mr-1"></i>${a.customerPhone}</span>
+                            </div>
+                            ${a.note ? `<p class="text-xs text-slate-500 mt-1">Not: "${a.note}"</p>` : ''}
+                        </div>
+
+                        <div class="flex items-center space-x-2 shrink-0">
+                            <a href="https://wa.me/${a.customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Merhaba ' + a.customerName + ', ' + a.date + ' ' + a.time + ' randevunuz onaylanmıştır.')}" target="_blank" class="px-3 py-1.5 bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600 hover:text-white border border-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center space-x-1">
+                                <i class="fa-brands fa-whatsapp"></i>
+                                <span>WhatsApp</span>
+                            </a>
+                            <a href="tel:${a.customerPhone}" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition">
+                                <i class="fa-solid fa-phone"></i>
+                            </a>
+                            ${!isApproved ? `
+                                <button onclick="updateAppStatus('${a.id}', 'Onaylandı')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition">
+                                    Onayla
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (err) {
+                container.innerHTML = '<div class="text-center py-8 text-rose-400 text-xs font-semibold">Yükleme hatası</div>';
+            }
+        }
+
+        async function updateAppStatus(id, status) {
+            try {
+                const res = await fetch(`/api/business/appointments/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+                if (res.ok) {
+                    if (currentBizAccount) loadBusinessAppointments(currentBizAccount.profileId);
+                }
+            } catch (e) {}
+        }
+    </script>
 </body>
 </html>

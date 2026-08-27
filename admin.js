@@ -91,21 +91,127 @@ async function authFetch(url, options = {}) {
 function switchAdminTab(tabName) {
     const pTab = document.getElementById('tab-content-profiles');
     const oTab = document.getElementById('tab-content-orders');
+    const aTab = document.getElementById('tab-content-appointments');
     const pBtn = document.getElementById('tab-btn-profiles');
     const oBtn = document.getElementById('tab-btn-orders');
+    const aBtn = document.getElementById('tab-btn-appointments');
+
+    pTab.classList.add('hidden');
+    oTab.classList.add('hidden');
+    if (aTab) aTab.classList.add('hidden');
+
+    pBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white';
+    oBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white flex items-center';
+    if (aBtn) aBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white flex items-center';
 
     if (tabName === 'profiles') {
         pTab.classList.remove('hidden');
-        oTab.classList.add('hidden');
         pBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-md';
-        oBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white flex items-center';
         loadAdminProfiles();
-    } else {
-        pTab.classList.add('hidden');
+    } else if (tabName === 'orders') {
         oTab.classList.remove('hidden');
-        pBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white';
         oBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-md flex items-center';
         loadAdminOrders();
+    } else if (tabName === 'appointments') {
+        if (aTab) aTab.classList.remove('hidden');
+        if (aBtn) aBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-emerald-600 text-white shadow-md flex items-center';
+        loadAdminAppointments();
+    }
+}
+
+async function loadAdminAppointments() {
+    try {
+        const res = await authFetch('/api/admin/appointments-summary');
+        const data = await res.json();
+
+        const bizAccounts = data.businessAccounts || [];
+        const appointments = data.appointments || [];
+
+        // Update counts
+        const countBadge = document.getElementById('stat-total-appointments-sys');
+        if (countBadge) countBadge.innerText = bizAccounts.length;
+        const bizBadge = document.getElementById('stat-biz-count-badge');
+        if (bizBadge) bizBadge.innerText = `${bizAccounts.length} Aktif Şirket`;
+
+        // Render Active Business Accounts Grid
+        const bizGrid = document.getElementById('active-businesses-grid');
+        if (bizGrid) {
+            if (bizAccounts.length === 0) {
+                bizGrid.innerHTML = `
+                    <div class="col-span-full text-center py-10 bg-slate-900 rounded-2xl border border-slate-800">
+                        <i class="fa-solid fa-store-slash text-3xl text-slate-600 mb-2"></i>
+                        <p class="text-xs font-bold text-slate-400">Henüz Randevu Paketi Aktif Olan Şirket Yok</p>
+                    </div>
+                `;
+            } else {
+                bizGrid.innerHTML = '';
+                bizAccounts.forEach(b => {
+                    const appCount = appointments.filter(a => a.profileId === b.profileId || a.businessName === b.businessName).length;
+                    const div = document.createElement('div');
+                    div.className = 'bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-3';
+                    div.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-extrabold text-white">${b.businessName}</span>
+                            <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/30">Aktif</span>
+                        </div>
+                        <div class="text-xs text-slate-400 space-y-1">
+                            <div><i class="fa-solid fa-key text-amber-400 w-4"></i> Giriş Şifresi: <strong class="text-white font-mono bg-slate-950 px-2 py-0.5 rounded border border-slate-800">${b.password}</strong></div>
+                            <div><i class="fa-solid fa-phone text-emerald-400 w-4"></i> Telefon: <span class="text-slate-300">${b.phone || 'Girilmedi'}</span></div>
+                            <div><i class="fa-solid fa-calendar-check text-indigo-400 w-4"></i> Toplam Randevu: <strong class="text-indigo-300">${appCount} Adet</strong></div>
+                        </div>
+                        <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
+                            <a href="/p/${b.profileId}" target="_blank" class="text-indigo-400 hover:underline font-bold flex items-center space-x-1">
+                                <span>Kart Profiline Git</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                            </a>
+                        </div>
+                    `;
+                    bizGrid.appendChild(div);
+                });
+            }
+        }
+
+        // Render All Appointments List
+        const appsList = document.getElementById('all-appointments-list');
+        if (appsList) {
+            if (appointments.length === 0) {
+                appsList.innerHTML = `
+                    <div class="text-center py-10 bg-slate-900 rounded-2xl border border-slate-800">
+                        <i class="fa-solid fa-calendar-xmark text-3xl text-slate-600 mb-2"></i>
+                        <p class="text-xs font-bold text-slate-400">Henüz Herhangi Bir Şirkete Randevu Talebi Düşmedi</p>
+                    </div>
+                `;
+            } else {
+                appsList.innerHTML = '';
+                appointments.forEach(a => {
+                    const isApproved = a.status === 'Onaylandı';
+                    const div = document.createElement('div');
+                    div.className = 'bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3';
+                    div.innerHTML = `
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs bg-indigo-500/20 text-indigo-300 font-bold px-2 py-0.5 rounded-full border border-indigo-500/30">${a.businessName}</span>
+                                <span class="text-sm font-bold text-white">${a.customerName}</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${isApproved ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">${a.status}</span>
+                            </div>
+                            <div class="text-xs text-slate-400 mt-1 flex items-center space-x-3">
+                                <span><i class="fa-solid fa-calendar text-indigo-400 mr-1"></i>${a.date} - ${a.time}</span>
+                                <span><i class="fa-solid fa-phone text-emerald-400 mr-1"></i>${a.customerPhone}</span>
+                            </div>
+                            ${a.note ? `<p class="text-xs text-slate-500 mt-1">Not: "${a.note}"</p>` : ''}
+                        </div>
+                        <div class="flex items-center space-x-2 shrink-0">
+                            <a href="tel:${a.customerPhone}" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition">
+                                <i class="fa-solid fa-phone"></i>
+                            </a>
+                        </div>
+                    `;
+                    appsList.appendChild(div);
+                });
+            }
+        }
+    } catch (e) {
+        console.error("Randevuları yükleme hatası:", e);
     }
 }
 

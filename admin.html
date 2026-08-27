@@ -95,12 +95,15 @@
                 </div>
                 
                 <!-- Nav Tabs -->
-                <div class="flex items-center space-x-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800">
+                <div class="flex items-center space-x-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 flex-wrap gap-y-1">
                     <button id="tab-btn-profiles" onclick="switchAdminTab('profiles')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-md">
                         <i class="fa-solid fa-address-card mr-1.5"></i> Kart Profilleri (<span id="stat-total-cards">0</span>)
                     </button>
                     <button id="tab-btn-orders" onclick="switchAdminTab('orders')" class="px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white flex items-center">
                         <i class="fa-solid fa-truck-fast mr-1.5 text-amber-400"></i> Gelen Siparişler <span id="stat-total-orders" class="ml-1.5 bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full text-[10px]">0</span>
+                    </button>
+                    <button id="tab-btn-appointments" onclick="switchAdminTab('appointments')" class="px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white flex items-center">
+                        <i class="fa-solid fa-calendar-days mr-1.5 text-emerald-400"></i> Aktif Randevu Sistemleri <span id="stat-total-appointments-sys" class="ml-1.5 bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full text-[10px]">0</span>
                     </button>
                 </div>
             </div>
@@ -116,6 +119,34 @@
             <div id="tab-content-orders" class="hidden space-y-4">
                 <div id="orders-list-container">
                     <!-- Orders rendered dynamically -->
+                </div>
+            </div>
+
+            <!-- TAB 3: Aktif Randevu Sistemleri -->
+            <div id="tab-content-appointments" class="hidden space-y-8">
+                <!-- Aktif Randevu Paketi Alan Şirketler -->
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+                            <i class="fa-solid fa-store text-emerald-400"></i>
+                            <span>Randevu Paketi Aktif Olan Şirketler</span>
+                        </h3>
+                        <span id="stat-biz-count-badge" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">0 Aktif Şirket</span>
+                    </div>
+                    <div id="active-businesses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Active Business Cards rendered dynamically -->
+                    </div>
+                </div>
+
+                <!-- Tüm Şirketlerin Müşteri Randevu Talepleri -->
+                <div>
+                    <h3 class="text-sm font-bold text-white mb-4 flex items-center space-x-2">
+                        <i class="fa-solid fa-calendar-check text-indigo-400"></i>
+                        <span>Tüm Şirketlerin Gelen Müşteri Randevu Talepleri</span>
+                    </h3>
+                    <div id="all-appointments-list" class="space-y-3">
+                        <!-- All Appointments rendered dynamically -->
+                    </div>
                 </div>
             </div>
         </main>
