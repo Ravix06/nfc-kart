@@ -96,25 +96,25 @@ function switchAdminTab(tabName) {
     const oBtn = document.getElementById('tab-btn-orders');
     const aBtn = document.getElementById('tab-btn-appointments');
 
-    pTab.classList.add('hidden');
-    oTab.classList.add('hidden');
+    if (pTab) pTab.classList.add('hidden');
+    if (oTab) oTab.classList.add('hidden');
     if (aTab) aTab.classList.add('hidden');
 
-    pBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white';
-    oBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white flex items-center';
-    if (aBtn) aBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white flex items-center';
+    if (pBtn) pBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white cursor-pointer';
+    if (oBtn) oBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white flex items-center cursor-pointer';
+    if (aBtn) aBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white flex items-center cursor-pointer';
 
     if (tabName === 'profiles') {
-        pTab.classList.remove('hidden');
-        pBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-md';
+        if (pTab) pTab.classList.remove('hidden');
+        if (pBtn) pBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-md cursor-pointer';
         loadAdminProfiles();
     } else if (tabName === 'orders') {
-        oTab.classList.remove('hidden');
-        oBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-md flex items-center';
+        if (oTab) oTab.classList.remove('hidden');
+        if (oBtn) oBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-md flex items-center cursor-pointer';
         loadAdminOrders();
     } else if (tabName === 'appointments') {
         if (aTab) aTab.classList.remove('hidden');
-        if (aBtn) aBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-emerald-600 text-white shadow-md flex items-center';
+        if (aBtn) aBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-emerald-600 text-white shadow-md flex items-center cursor-pointer';
         loadAdminAppointments();
     }
 }
