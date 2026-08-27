@@ -140,11 +140,17 @@
                 </p>
 
                 <!-- CTA Buttons Row -->
-                <div class="pt-2 flex flex-wrap items-center gap-4">
-                    <a href="/order" class="bg-slate-950 hover:bg-slate-900 text-white font-black px-7 py-3.5 rounded-full border border-slate-700 text-sm flex items-center space-x-2 transition transform hover:scale-105 shadow-xl">
+                <div class="pt-2 flex flex-wrap items-center gap-3 sm:gap-4">
+                    <a href="/order" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black px-7 py-3.5 rounded-full text-sm flex items-center space-x-2 transition transform hover:scale-105 shadow-xl shadow-indigo-500/20">
                         <span>Kartını Oluştur</span>
                         <span class="text-base">↗</span>
                     </a>
+
+                    <button onclick="openBusinessLoginModal()" class="bg-slate-900 hover:bg-slate-800 text-emerald-300 hover:text-emerald-200 font-extrabold px-6 py-3.5 rounded-full border border-emerald-500/40 text-sm flex items-center space-x-2 transition transform hover:scale-105 shadow-lg shadow-emerald-500/10">
+                        <i class="fa-solid fa-calendar-check text-emerald-400 text-base animate-pulse"></i>
+                        <span>📅 İşletme Randevu Girişi</span>
+                    </button>
+
                     <a href="#nasıl-calisir" class="text-slate-400 hover:text-white font-semibold text-sm transition flex items-center space-x-1.5 px-3 py-2">
                         <span>Nasıl çalışır</span>
                         <span>→</span>
