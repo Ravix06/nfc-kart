@@ -117,27 +117,57 @@ async function syncToCloudBackup(key, data) {
     } catch(e) {}
 }
 
-// Helpers: Read / Save Profiles
+let inMemoryProfiles = [];
+
 function getProfiles() {
+    const profilesMap = new Map();
+
+    // 1. Read main profiles file
     try {
-        if (!fs.existsSync(DATA_FILE)) {
-            const dataDir = path.dirname(DATA_FILE);
-            if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            fs.writeFileSync(DATA_FILE, '[]', 'utf8');
-            return [];
+        if (fs.existsSync(DATA_FILE)) {
+            const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8') || '[]');
+            data.forEach(p => { if (p && p.id) profilesMap.set(p.id, p); });
         }
-        return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8') || '[]');
-    } catch (err) {
-        console.error("Profiles okuma hatası:", err);
-        return [];
-    }
+    } catch (e) {}
+
+    // 2. Read backup profiles file
+    try {
+        const backupFile = path.join(__dirname, 'data', 'backup_profiles.json');
+        if (fs.existsSync(backupFile)) {
+            const bData = JSON.parse(fs.readFileSync(backupFile, 'utf8') || '[]');
+            bData.forEach(p => { if (p && p.id && !profilesMap.has(p.id)) profilesMap.set(p.id, p); });
+        }
+    } catch (e) {}
+
+    // 3. Merge in-memory cache
+    inMemoryProfiles.forEach(p => {
+        if (p && p.id && !profilesMap.has(p.id)) profilesMap.set(p.id, p);
+    });
+
+    // 4. Auto-recover draft profiles from orders
+    try {
+        if (fs.existsSync(ORDERS_FILE)) {
+            const orders = JSON.parse(fs.readFileSync(ORDERS_FILE, 'utf8') || '[]');
+            orders.forEach(o => {
+                if (o.draftProfile && o.draftProfile.id && !profilesMap.has(o.draftProfile.id)) {
+                    profilesMap.set(o.draftProfile.id, o.draftProfile);
+                }
+            });
+        }
+    } catch (e) {}
+
+    return Array.from(profilesMap.values());
 }
 
 function saveProfiles(profiles) {
     try {
+        inMemoryProfiles = profiles;
         const dataDir = path.dirname(DATA_FILE);
         if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
         fs.writeFileSync(DATA_FILE, JSON.stringify(profiles, null, 2), 'utf8');
+
+        const backupFile = path.join(__dirname, 'data', 'backup_profiles.json');
+        fs.writeFileSync(backupFile, JSON.stringify(profiles, null, 2), 'utf8');
         syncToCloudBackup('profiles', profiles);
     } catch (err) {
         console.error("Profiles kaydetme hatası:", err);
