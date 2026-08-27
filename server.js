@@ -142,7 +142,7 @@ syncAllCompletedOrdersToProfiles();
 // TELEGRAM BOT ANLIK CEP BİLDİRİMİ VE ONAY BUTONU GÖNDERİCİ (GARANTİ 100% İLETİM)
 async function sendTelegramNotification(order) {
     const qty = order.quantity || 1;
-    const price = order.totalPrice || order.price || '500 TL';
+    const price = order.totalPrice || order.price || '700 TL';
     const isKapida = (order.paymentMethod || '').includes('Kapıda');
 
     const notifyMsg = `🚨 SİPARİŞİNİZ GELDİ!!! 🚨\n📦 NFC KART CNR SİPARİŞİ (${qty} ADET)\n\nSipariş No: ${order.id}\nAdet: ${qty} Adet\nToplam Tutar: ${price}\nÖdeme Yöntemi: ${order.paymentMethod || 'IBAN Havale/EFT'}\nMüşteri Adı: ${order.customerName}\nTelefon: ${order.customerPhone}\nKart Modeli: ${order.cardColor}\nTeslimat Adresi: ${order.city}/${order.district} - ${order.address}\nNot: ${order.note || 'Yok'}\n\nDurum: ${isKapida ? 'Kapıda Ödeme (Hazırlanacak)' : 'Bekliyor (Ödeme Onayı Bekleniyor)'}`;
@@ -401,7 +401,7 @@ app.post('/api/orders', (req, res) => {
     // Save Order (Draft Profile ile birlikte)
     const orders = getOrders();
     const qty = parseInt(req.body.quantity) || 1;
-    const totalPriceCalc = req.body.totalPrice || req.body.price || `${(qty * 500).toLocaleString('tr-TR')} TL`;
+    const totalPriceCalc = req.body.totalPrice || req.body.price || `${(qty * 700).toLocaleString('tr-TR')} TL`;
 
     const newOrder = {
         id: `siparis-${Date.now().toString().slice(-4)}`,
@@ -583,6 +583,24 @@ app.get(['/js/admin.js', '/admin.js'], (req, res) => {
     if (fs.existsSync(rootJs)) return res.sendFile(rootJs);
     if (fs.existsSync(pubJs)) return res.sendFile(pubJs);
     res.sendFile(pubJs);
+});
+
+// Logo & Favicon Dynamic Handler
+app.get(['/img/logo.jpg', '/logo.jpg', '/favicon.ico'], (req, res) => {
+    const pubLogo = path.join(__dirname, 'public', 'img', 'logo.jpg');
+    const rootLogo = path.join(__dirname, 'logo.jpg');
+    if (fs.existsSync(pubLogo)) return res.sendFile(pubLogo);
+    if (fs.existsSync(rootLogo)) return res.sendFile(rootLogo);
+    res.redirect('https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=400&q=80');
+});
+
+// Banner Dynamic Handler
+app.get(['/img/banner.jpg', '/banner.jpg'], (req, res) => {
+    const pubBanner = path.join(__dirname, 'public', 'img', 'banner.jpg');
+    const rootBanner = path.join(__dirname, 'banner.jpg');
+    if (fs.existsSync(pubBanner)) return res.sendFile(pubBanner);
+    if (fs.existsSync(rootBanner)) return res.sendFile(rootBanner);
+    res.redirect('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80');
 });
 
 // Google Verification & SEO Crawl Routes
