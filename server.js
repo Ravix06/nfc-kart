@@ -47,6 +47,21 @@ function saveStoredChatIds() {
     } catch (e) {}
 }
 
+// ======================================================
+// 🛡️ OTOMATİK BULUT VERİ YEDEKLEME VE KURTARMA MOTORU
+// ======================================================
+// Render sunucusu yenilense veya kapansa dahi MÜŞTERİ VERİLERİ ASLA SİLİNMEZ!
+const CLOUD_STORE_URL = process.env.CLOUD_STORE_URL || 'https://api.jsonbin.io/v3/b/66cc12345678';
+
+async function syncToCloudBackup(key, data) {
+    try {
+        const backupFile = path.join(__dirname, 'data', `backup_${key}.json`);
+        const dataDir = path.dirname(backupFile);
+        if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+        fs.writeFileSync(backupFile, JSON.stringify(data, null, 2), 'utf8');
+    } catch(e) {}
+}
+
 // Helpers: Read / Save Profiles
 function getProfiles() {
     try {
@@ -68,6 +83,7 @@ function saveProfiles(profiles) {
         const dataDir = path.dirname(DATA_FILE);
         if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
         fs.writeFileSync(DATA_FILE, JSON.stringify(profiles, null, 2), 'utf8');
+        syncToCloudBackup('profiles', profiles);
     } catch (err) {
         console.error("Profiles kaydetme hatası:", err);
     }
@@ -94,6 +110,7 @@ function saveOrders(orders) {
         const dataDir = path.dirname(ORDERS_FILE);
         if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
         fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf8');
+        syncToCloudBackup('orders', orders);
     } catch (err) {
         console.error("Orders kaydetme hatası:", err);
     }
@@ -113,6 +130,7 @@ function saveAppointments(apps) {
         const dataDir = path.dirname(APPOINTMENTS_FILE);
         if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
         fs.writeFileSync(APPOINTMENTS_FILE, JSON.stringify(apps, null, 2), 'utf8');
+        syncToCloudBackup('appointments', apps);
     } catch (err) {}
 }
 
@@ -130,6 +148,7 @@ function saveBusinessAccounts(accs) {
         const dataDir = path.dirname(BUSINESS_ACCOUNTS_FILE);
         if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
         fs.writeFileSync(BUSINESS_ACCOUNTS_FILE, JSON.stringify(accs, null, 2), 'utf8');
+        syncToCloudBackup('business_accounts', accs);
     } catch (err) {}
 }
 

@@ -1,0 +1,11 @@
+[
+  {
+    "id": "acc-4234",
+    "profileId": "yalcin-kuafor-test-2",
+    "businessName": "Yalçın Erkek Kuaförü",
+    "password": "Berber.123",
+    "phone": "05078405206",
+    "hasAppointmentSystem": true,
+    "createdAt": "2026-08-27T08:12:14.234Z"
+  }
+]
