@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFC KART CNR - Dijital Akıllı Kartvizit & Temassız Takip Platformu</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="google-site-verification" content="google24176a52df022b5f" />
+    <meta name="description" content="NFC KART CNR - Temassız dijital kartvizit, Instagram takip kartı ve Google 5 yıldızlı yorum kartları. Uygulama indirmeden tek dokunuşla rehbere kayıt olun. Ücretsiz Kargo!">
+    <meta name="keywords" content="NFC KART CNR, nfc kart, dijital kartvizit, akıllı kartvizit, temassız takip kartı, instagram takip kartı, google yorum kartı, nfc kartvizit al">
+    <meta name="author" content="NFC KART CNR">
+
+    <!-- Google Arama İkonu / Favicon -->
+    <link rel="icon" type="image/jpeg" href="/img/logo.jpg">
+    <link rel="shortcut icon" type="image/jpeg" href="/img/logo.jpg">
+    <link rel="apple-touch-icon" href="/img/logo.jpg">
+
+    <!-- Open Graph / Social Media Preview -->
+    <meta property="og:title" content="NFC KART CNR - Dijital Akıllı Kartvizit & Temassız Takip Kartı">
+    <meta property="og:description" content="Bütün renklerin tek kartta. WhatsApp, Instagram, konum ve Google yorumları — kartın telefona değdiği an hepsi karşınızdakinin cebinde.">
+    <meta property="og:type" content="website">
+
+    <!-- Schema.org Google Structured Data (Zengin Arama Sonuçları) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": "NFC KART CNR - Dijital Akıllı Kartvizit",
+      "image": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=800&q=80",
+      "description": "Temassız dijital kartvizit, Instagram takip kartı ve Google 5 yıldız yorum kartı tek bir smart kartta birleşti.",
+      "brand": {
+        "@type": "Brand",
+        "name": "NFC KART CNR"
+      },
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "TRY",
+        "price": "500.00",
+        "availability": "https://schema.org/InStock"
+      }
+    }
+    </script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-[#121316] text-slate-100 flex flex-col min-h-screen font-sans selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top Floating Centered Navbar (Kapsül Yüzen Menü) -->
+    <div class="sticky top-4 z-50 px-4 flex justify-center w-full">
+        <nav class="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 rounded-full px-5 sm:px-7 py-2.5 flex items-center justify-between shadow-2xl max-w-4xl w-full">
+            
+            <!-- Left Logo -->
+            <a href="/" class="flex items-center space-x-2.5 shrink-0">
+                <img src="/img/logo.jpg" alt="NFC KART CNR Logo" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=400&q=80'" class="w-8 h-8 rounded-xl object-cover border border-indigo-500/40 shadow-lg shadow-indigo-500/20">
+                <span class="font-extrabold text-sm sm:text-base tracking-tight text-white">NFC KART CNR</span>
+            </a>
+
+            <!-- Middle Navigation Links -->
+            <div class="hidden md:flex items-center space-x-6 text-xs text-slate-300 font-medium">
+                <a href="#nasıl-calisir" class="hover:text-white transition">Nasıl çalışır</a>
+                <a href="#ozellikler" class="hover:text-white transition">Özellikler</a>
+                <a href="/siparislerim" class="hover:text-indigo-400 transition flex items-center space-x-1 font-bold text-indigo-300">
+                    <i class="fa-solid fa-box-open text-indigo-400"></i>
+                    <span>Siparişlerim</span>
+                </a>
+                <a href="https://wa.me/905078405206" target="_blank" class="hover:text-emerald-400 transition flex items-center space-x-1">
+                    <i class="fa-brands fa-whatsapp text-emerald-400"></i>
+                    <span>Destek</span>
+                </a>
+            </div>
+
+            <!-- Right CTA Buttons -->
+            <div class="flex items-center space-x-2 shrink-0">
+                <a href="/admin" class="text-xs text-slate-400 hover:text-amber-400 transition font-bold px-3 py-1.5 rounded-full border border-slate-800 hover:border-amber-500/40 flex items-center space-x-1">
+                    <i class="fa-solid fa-key text-amber-400 text-[11px]"></i>
+                    <span>Admin</span>
+                </a>
+                <a href="/order" class="bg-slate-950 hover:bg-slate-800 text-white font-bold px-4 py-2 rounded-full border border-slate-700/80 text-xs flex items-center space-x-1.5 transition transform hover:scale-105 shadow-md">
+                    <span>Kart Oluştur</span>
+                    <span class="text-sm">↗</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Hero Section -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 w-full flex flex-col justify-center">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            <!-- Left Text Content -->
+            <div class="lg:col-span-7 text-left space-y-6">
+                
+                <!-- Pill Badge -->
+                <div class="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-emerald-400 text-xs font-semibold">
+                    <span class="flex space-x-1 text-[8px]">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
+                    </span>
+                    <span class="tracking-widest uppercase text-[10px] font-bold text-slate-300">DİJİTAL KARTVİZİT</span>
+                </div>
+
+                <!-- Main Heading -->
+                <h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight leading-[1.1]">
+                    Bütün renklerin. <br>
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-slate-100 via-indigo-300 to-slate-400">Tek kartta.</span>
+                </h1>
+
+                <!-- Subtitle Text -->
+                <p class="text-slate-400 text-base sm:text-lg max-w-xl leading-relaxed">
+                    WhatsApp'ın, Instagram'ın, konumun, IBAN'ın — kartın telefona değdiği an hepsi karşındakinin cebinde. Uygulama indirmeden.
+                </p>
+
+                <!-- CTA Buttons Row -->
+                <div class="pt-2 flex flex-wrap items-center gap-4">
+                    <a href="/order" class="bg-slate-950 hover:bg-slate-900 text-white font-black px-7 py-3.5 rounded-full border border-slate-700 text-sm flex items-center space-x-2 transition transform hover:scale-105 shadow-xl">
+                        <span>Kartını Oluştur</span>
+                        <span class="text-base">↗</span>
+                    </a>
+                    <a href="#nasıl-calisir" class="text-slate-400 hover:text-white font-semibold text-sm transition flex items-center space-x-1.5 px-3 py-2">
+                        <span>Nasıl çalışır</span>
+                        <span>→</span>
+                    </a>
+                </div>
+
+                <!-- Live Stats Row -->
+                <div class="pt-8 grid grid-cols-3 gap-4 border-t border-slate-800/80 max-w-md">
+                    <div>
+                        <div class="text-2xl font-black text-white">30+</div>
+                        <div class="text-xs text-slate-500 font-medium mt-0.5">aktif kart</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-black text-white">Tek dokunuş</div>
+                        <div class="text-xs text-slate-500 font-medium mt-0.5">rehbere kayıt</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-black text-white">Sınırsız</div>
+                        <div class="text-xs text-slate-500 font-medium mt-0.5">güncelleme</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Interactive NFC Card Visual Mockup -->
+            <div class="lg:col-span-5 relative flex items-center justify-center py-10 px-4">
+                
+                <!-- Floating Social Badges (z-20 to float around card seamlessly) -->
+                <!-- Top Right: Instagram -->
+                <div class="absolute -top-2 right-4 sm:right-8 z-20 w-12 h-12 bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl shadow-pink-500/30 transform hover:scale-110 transition duration-300 animate-pulse">
+                    <i class="fa-brands fa-instagram"></i>
+                </div>
+
+                <!-- Top Left: WhatsApp -->
+                <div class="absolute top-8 -left-2 sm:left-2 z-20 w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-slate-950 text-2xl shadow-xl shadow-emerald-500/30 transform hover:scale-110 transition duration-300">
+                    <i class="fa-brands fa-whatsapp"></i>
+                </div>
+
+                <!-- Bottom Right: YouTube -->
+                <div class="absolute -bottom-2 right-6 sm:right-10 z-20 w-12 h-12 bg-rose-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl shadow-rose-600/30 transform hover:scale-110 transition duration-300">
+                    <i class="fa-brands fa-youtube"></i>
+                </div>
+
+                <!-- Bottom Left: LinkedIn -->
+                <div class="absolute bottom-6 -left-3 sm:left-4 z-20 w-12 h-12 bg-sky-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl shadow-sky-600/30 transform hover:scale-110 transition duration-300">
+                    <i class="fa-brands fa-linkedin"></i>
+                </div>
+
+                <!-- Top Center Small Badge: TikTok -->
+                <div class="absolute -top-6 left-1/3 z-20 w-10 h-10 bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-center text-white text-lg shadow-lg">
+                    <i class="fa-brands fa-tiktok"></i>
+                </div>
+
+                <!-- Middle Right: Map Pin -->
+                <div class="absolute top-1/2 -right-3 z-20 w-9 h-9 bg-emerald-500/20 border border-emerald-500/40 rounded-xl flex items-center justify-center text-emerald-400 text-base shadow-lg">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+
+                <!-- Gümüş / Siyah Metal NFC Card Visual (z-10) -->
+                <div class="relative z-10 w-full max-w-sm aspect-[1.58/1] bg-gradient-to-tr from-slate-950 via-slate-900 to-slate-950 rounded-3xl p-6 border border-slate-700/80 shadow-2xl shadow-indigo-500/20 transform rotate-3 hover:rotate-0 transition duration-500 flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <span class="font-black text-lg text-white tracking-tight">NFC KART CNR</span>
+                        <i class="fa-solid fa-wifi text-slate-300 text-xl transform rotate-90"></i>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="w-10 h-8 rounded-lg bg-slate-800/90 border border-slate-700"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-[10px] tracking-widest text-slate-400 font-mono font-bold uppercase">
+                        <span>DOKUN</span>
+                        <span>•</span>
+                        <span>PAYLAŞ</span>
+                        <span>•</span>
+                        <span>KAYDET</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- 🚀 BİRLEŞTİRİLMİŞ EN ÜST BÖLÜM: Temassız Takip & Yorum Kartları (HEPSİ TEK KARTTA BİRLEŞİK) -->
+        <section class="mt-16 text-left w-full max-w-6xl mx-auto border-t border-slate-800/80 pt-14">
+            <div class="mb-10">
+                <div class="text-[11px] font-bold tracking-widest text-slate-400 uppercase mb-2 flex items-center space-x-2">
+                    <span class="w-4 h-[2px] bg-gradient-to-r from-pink-500 to-amber-500"></span>
+                    <span>HEPSİ TEK BİR SMART KARTTA BİRLEŞTİ</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                    Bir dokunuş yeter. <br>
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-pink-400 via-purple-400 to-emerald-400">Temassız Takip & Yorum Kartları</span>
+                </h2>
+                <p class="mt-3 text-slate-400 text-xs sm:text-sm max-w-xl leading-relaxed">
+                    Ayrı ayrı kart taşımanıza gerek yok! Tek bir NFC KART CNR ile Instagram takipçisi toplayın, Google haritalarda 5 yıldızlı yorumlar alın ve tüm iletişim bilgilerinizi saniyesinde paylaşın.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- 1. TEMASSIZ INSTAGRAM TAKİP KARTI -->
+                <div class="bg-[#18191d] p-7 sm:p-8 rounded-3xl border border-slate-800/80 hover:border-pink-500/40 transition space-y-5 relative overflow-hidden group shadow-xl flex flex-col justify-between">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-2xl group-hover:bg-pink-500/20 transition"></div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 flex items-center justify-center text-white text-2xl shadow-lg shrink-0">
+                                <i class="fa-brands fa-instagram"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-extrabold text-white">Temassız Instagram Takip Özelliği</h3>
+                                <p class="text-xs text-pink-400 font-semibold">Bir dokunuş yeter. Takipçi sayınızı katlayın.</p>
+                            </div>
+                        </div>
+
+                        <!-- Product Photo Mockup -->
+                        <div class="relative rounded-2xl overflow-hidden border border-slate-800/80 h-48 sm:h-56 bg-slate-950">
+                            <img src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=800&q=80" alt="Instagram NFC Kart" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-90">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+                            <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs font-bold text-white">
+                                <span class="bg-pink-500/30 text-pink-300 px-3 py-1 rounded-full border border-pink-500/40 backdrop-blur-md">📱 Telefonu Yaklaştır, Takip Et</span>
+                                <span class="text-amber-400 font-mono text-[11px]">NFC KART CNR</span>
+                            </div>
+                        </div>
+
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            Müşteriniz telefonunu kartınıza yaklaştırır ve anında Instagram hesabınıza yönlendirilir. Takipçi sayınızı organik olarak katlayın!
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                            <div class="flex items-center space-x-2 text-pink-400 text-xs font-bold mb-1">
+                                <i class="fa-solid fa-wifi"></i>
+                                <span>MODERN</span>
+                            </div>
+                            <div class="text-[11px] text-slate-400">Dijital dünyaya uygun, çağdaş bir deneyim</div>
+                        </div>
+                        <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                            <div class="flex items-center space-x-2 text-sky-400 text-xs font-bold mb-1">
+                                <i class="fa-solid fa-mobile-screen"></i>
+                                <span>PRATİK</span>
+                            </div>
+                            <div class="text-[11px] text-slate-400">Uygulama indirmeye gerek yok</div>
+                        </div>
+                        <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                            <div class="flex items-center space-x-2 text-emerald-400 text-xs font-bold mb-1">
+                                <i class="fa-solid fa-heart"></i>
+                                <span>ETKİLİ</span>
+                            </div>
+                            <div class="text-[11px] text-slate-400">Takipçi sayınızı organik olarak artırır</div>
+                        </div>
+                        <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                            <div class="flex items-center space-x-2 text-purple-400 text-xs font-bold mb-1">
+                                <i class="fa-solid fa-chart-line"></i>
+                                <span>PROFESYONEL</span>
+                            </div>
+                            <div class="text-[11px] text-slate-400">Markanıza modern bir imaj kazandırır</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. TEMASSIZ GOOGLE 5 YILDIZ YORUM KARTI -->
+                <div class="bg-[#18191d] p-7 sm:p-8 rounded-3xl border border-slate-800/80 hover:border-emerald-500/40 transition space-y-5 relative overflow-hidden group shadow-xl flex flex-col justify-between">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition"></div>
+
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-2xl bg-white text-slate-950 flex items-center justify-center text-2xl font-black shadow-lg shrink-0">
+                                <span class="text-blue-500">G</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-extrabold text-white flex items-center gap-2">
+                                    <span>Temassız Google Yorum Özelliği</span>
+                                    <span class="text-amber-400 text-sm">★★★★★</span>
+                                </h3>
+                                <p class="text-xs text-emerald-400 font-semibold">Telefonunuzu buraya yaklaştırın 📶</p>
+                            </div>
+                        </div>
+
+                        <!-- Product Photo Mockup -->
+                        <div class="relative rounded-2xl overflow-hidden border border-slate-800/80 h-48 sm:h-56 bg-slate-950">
+                            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80" alt="Google Yorum NFC Kart" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-90">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+                            <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs font-bold text-white">
+                                <span class="bg-emerald-500/30 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/40 backdrop-blur-md">⭐ Direkt 5 Yıldız Yorum Açılır</span>
+                                <span class="text-amber-400 font-mono text-[11px]">NFC KART CNR</span>
+                            </div>
+                        </div>
+
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            Memnun müşteriniz karttan direkt Google Harita profilinize 5 yıldızlı yorum bıraksın — Google haritalarda ilk sıraya yükselin!
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3 pt-2">
+                        <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800 text-center space-y-1">
+                            <i class="fa-solid fa-bolt text-amber-400 text-lg"></i>
+                            <div class="text-[11px] font-bold text-white">Hızlı ve Kolay</div>
+                        </div>
+                        <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800 text-center space-y-1">
+                            <i class="fa-solid fa-shield-halved text-emerald-400 text-lg"></i>
+                            <div class="text-[11px] font-bold text-white">Güvenli Temassız</div>
+                        </div>
+                        <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800 text-center space-y-1">
+                            <i class="fa-solid fa-users text-indigo-400 text-lg"></i>
+                            <div class="text-[11px] font-bold text-white">Deneyim Paylaş</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Sleek Glowing Gradient Divider Line -->
+        <div class="w-full max-w-4xl mx-auto mt-20 mb-6 flex items-center justify-center">
+            <div class="w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent shadow-sm shadow-indigo-500/50"></div>
+        </div>
+
+        <!-- Nasıl Çalışır Section (Birebir Görseldeki Tasarım) -->
+        <section id="nasıl-calisir" class="text-left w-full max-w-4xl mx-auto pt-8">
+            
+            <div class="mb-12">
+                <div class="text-[11px] font-bold tracking-widest text-slate-400 uppercase mb-2 flex items-center space-x-2">
+                    <span class="w-4 h-[2px] bg-indigo-500"></span>
+                    <span>NASIL ÇALIŞIR</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                    Üç saniye. Bir dokunuş.
+                </h2>
+            </div>
+
+            <!-- Steps List -->
+            <div class="space-y-0 divide-y divide-slate-800/80 border-y border-slate-800/80">
+                
+                <!-- 01 Dokun -->
+                <div class="py-8 grid grid-cols-1 md:grid-cols-12 gap-4 items-start hover:bg-slate-900/20 transition px-2 rounded-2xl">
+                    <div class="md:col-span-2 font-mono text-sm font-bold text-slate-500">01</div>
+                    <div class="md:col-span-10 space-y-1.5">
+                        <h3 class="text-xl font-bold text-white tracking-tight">Dokun</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed max-w-2xl">
+                            Karşındaki kişi kartı telefonuna yaklaştırır. Karşı tarafın bir uygulama indirmesine gerek yoktur.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 02 Gör -->
+                <div class="py-8 grid grid-cols-1 md:grid-cols-12 gap-4 items-start hover:bg-slate-900/20 transition px-2 rounded-2xl">
+                    <div class="md:col-span-2 font-mono text-sm font-bold text-slate-500">02</div>
+                    <div class="md:col-span-10 space-y-1.5">
+                        <h3 class="text-xl font-bold text-white tracking-tight">Gör</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed max-w-2xl">
+                            Profilin açılır: adın, unvanın, WhatsApp, konum, sosyal medya ve dilersen işletme kartın — hepsi tek, sade ekranda.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 03 Kaydet -->
+                <div class="py-8 grid grid-cols-1 md:grid-cols-12 gap-4 items-start hover:bg-slate-900/20 transition px-2 rounded-2xl">
+                    <div class="md:col-span-2 font-mono text-sm font-bold text-slate-500">03</div>
+                    <div class="md:col-span-10 space-y-1.5">
+                        <h3 class="text-xl font-bold text-white tracking-tight">Kaydet</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed max-w-2xl">
+                            Tek dokunuşla rehbere eklenirsin. Cepte kaybolan bir kâğıt değil, telefonda kalıcı bir kayıt olursun.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Özellikler Section (Birebir Görseldeki Tasarım - Randevu Defteri Haricinde) -->
+        <section id="ozellikler" class="mt-28 text-left w-full max-w-6xl mx-auto border-t border-slate-800/80 pt-16">
+            
+            <div class="mb-12">
+                <div class="text-[11px] font-bold tracking-widest text-slate-400 uppercase mb-2 flex items-center space-x-2">
+                    <span class="w-4 h-[2px] bg-indigo-500"></span>
+                    <span>BİR KARTTAN FAZLASI</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                    Renk onların. <br>
+                    Sahne senin.
+                </h2>
+                <p class="mt-4 text-slate-400 text-sm max-w-xl leading-relaxed">
+                    Site siyah-beyaz, çünkü asıl yıldız senin işin. Her uygulama kendi rengiyle parlar — müşterin neye tıklayacağını bir bakışta bilir.
+                </p>
+            </div>
+
+            <!-- 5 Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- 1. Tek dokunuş iletişim -->
+                <div class="bg-[#18191d] p-7 rounded-3xl border border-slate-800/80 space-y-4 hover:border-emerald-500/30 transition">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white mb-1.5">Tek dokunuş iletişim</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">
+                            WhatsApp, arama, e-posta — karşı taraf uygulama indirmeden, düşünmeden ulaşır.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 2. Konum & Google yorum -->
+                <div class="bg-[#18191d] p-7 rounded-3xl border border-slate-800/80 space-y-4 hover:border-emerald-500/30 transition">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white mb-1.5">Konum & Google yorum</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">
+                            Yol tarifi tek tık. Memnun müşterin karttan direkt Google'a yorum bırakır — haritada yükselirsin.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 3. Gerçek istatistik -->
+                <div class="bg-[#18191d] p-7 rounded-3xl border border-slate-800/80 space-y-4 hover:border-indigo-500/30 transition">
+                    <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white mb-1.5">Gerçek istatistik</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">
+                            Kaç kişi baktı, hangi bölüme tıkladı — panelden canlı izlersin.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 4. Kampanya, katalog & video -->
+                <div class="bg-[#18191d] p-7 rounded-3xl border border-slate-800/80 space-y-4 hover:border-purple-500/30 transition">
+                    <div class="w-10 h-10 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white mb-1.5">Kampanya, katalog & video</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">
+                            Kampanya afişin, ürün kataloğun (PDF) ve tanıtım videon kartında.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 5. Beni Ara -->
+                <div class="bg-[#18191d] p-7 rounded-3xl border border-slate-800/80 space-y-4 hover:border-emerald-500/30 transition">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500 text-slate-950 flex items-center justify-center text-base font-bold">
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white mb-1.5">"Beni Ara"</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">
+                            Ziyaretçi ad-telefon bırakır; sen müsait olunca ararsın.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- WhatsApp & Aylık Ücret Yok Alt Duyuru Bandı (3. Görseldeki Birebir Tasarım) -->
+        <div class="mt-20 w-full max-w-4xl mx-auto text-center py-4 px-6 bg-slate-900/90 rounded-2xl border border-slate-800/80 text-xs sm:text-sm text-slate-300 flex items-center justify-center space-x-2 flex-wrap">
+            <span>Aylık ücret yok</span>
+            <span class="text-slate-600">•</span>
+            <span>Sorularınız için yalnızca</span>
+            <a href="https://wa.me/905078405206" target="_blank" class="text-emerald-400 font-extrabold hover:underline flex items-center space-x-1">
+                <i class="fa-brands fa-whatsapp text-sm"></i>
+                <span>WhatsApp'tan yazın (0507 840 52 06)</span>
+            </a>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 py-8 text-center text-slate-500 text-xs bg-slate-950">
+        <p>© 2026 NFC KART CNR - Tüm Hakları Saklıdır.</p>
+    </footer>
+</body>
+</html>
