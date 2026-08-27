@@ -38,15 +38,44 @@
     ],
     "ibans": [
       {
-        "bank": "Halkbank / Ziraat",
-        "name": "Ruken Ceylan",
-        "iban": "TR53 0001 2001 5530 0001 1062 98"
+        "bank": "Ziraat Bankası",
+        "name": "Çınar Ceylan",
+        "iban": "TR00 0000 0000 0000 0000 0000 00"
       }
     ],
-    "views": 1,
+    "views": 12,
     "createdAt": "2026-08-25T21:23:42.715Z"
-  }
-]t": "2026-08-27T00:56:36.812Z"
+  },
+  {
+    "id": "yalcin-erkek-kuaforu",
+    "name": "Yalçın Kuaför",
+    "title": "Erkek Kuaförü & Saç Tasarım",
+    "company": "Yalçın Erkek Kuaförü",
+    "bio": "Profesyonel Saç & Sakal Tasarım Hizmetleri.",
+    "phone": "05078405206",
+    "email": "",
+    "location": "Ankara Çankaya",
+    "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80",
+    "banner": "/img/banner.jpg",
+    "theme": "dark",
+    "hasAppointmentSystem": true,
+    "appointmentBusinessName": "Yalçın Erkek Kuaförü",
+    "appointmentPassword": "Berber.123",
+    "links": [
+      {
+        "title": "WhatsApp ile İletişim",
+        "url": "https://wa.me/905078405206",
+        "icon": "whatsapp"
+      },
+      {
+        "title": "Instagram Hesabımız",
+        "url": "https://instagram.com",
+        "icon": "instagram"
+      }
+    ],
+    "ibans": [],
+    "views": 5,
+    "createdAt": "2026-08-27T00:56:36.812Z"
   },
   {
     "id": "cinar-ceylan-6",

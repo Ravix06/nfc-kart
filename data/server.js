@@ -1065,6 +1065,24 @@ app.get('/p/:id', (req, res) => {
     res.sendFile(pubProf);
 });
 
+app.get('/order', (req, res) => {
+    const rootOrder = path.join(__dirname, 'order.html');
+    const pubOrder = path.join(__dirname, 'public', 'order.html');
+    if (fs.existsSync(rootOrder)) {
+        try {
+            const rootContent = fs.readFileSync(rootOrder, 'utf8');
+            if (rootContent.includes('TR53 0001 2001 5530 0001 1062 98')) return res.sendFile(rootOrder);
+        } catch(e) {}
+    }
+    if (fs.existsSync(pubOrder)) {
+        try {
+            const pubContent = fs.readFileSync(pubOrder, 'utf8');
+            if (pubContent.includes('TR53 0001 2001 5530 0001 1062 98')) return res.sendFile(pubOrder);
+        } catch(e) {}
+    }
+    res.sendFile(pubOrder);
+});
+
 app.get('/', (req, res) => {
     const rootIndex = path.join(__dirname, 'index.html');
     const pubIndex = path.join(__dirname, 'public', 'index.html');

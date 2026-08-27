@@ -1,0 +1,20 @@
+[
+  {
+    "id": "acc-4407",
+    "profileId": "yalcin-kuafor-test-2",
+    "businessName": "Yalçın Erkek Kuaförü",
+    "password": "Berber.123",
+    "phone": "05078405206",
+    "hasAppointmentSystem": true,
+    "createdAt": "2026-08-27T20:44:04.407Z"
+  },
+  {
+    "id": "acc-cinar",
+    "profileId": "cinar-ceylan",
+    "businessName": "NFC KART CNR Teknoloji",
+    "password": "Admin.123",
+    "phone": "05078405206",
+    "hasAppointmentSystem": true,
+    "createdAt": "2026-08-27T00:00:00.000Z"
+  }
+]
