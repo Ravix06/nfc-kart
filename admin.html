@@ -294,12 +294,26 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Profil Fotoğrafı (URL)</label>
-                        <input type="text" id="form-avatar" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Profil Fotoğrafı / Logo</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="form-avatar" placeholder="https://... veya Görsel Seçin" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                            <input type="file" id="admin-avatar-file" accept="image/*" class="hidden" onchange="handleAdminAvatarFileSelect(event)">
+                            <button type="button" onclick="document.getElementById('admin-avatar-file').click()" class="bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white px-3 py-2.5 rounded-xl border border-indigo-500/30 transition text-xs font-bold shrink-0 flex items-center space-x-1">
+                                <i class="fa-solid fa-upload"></i>
+                                <span>Fotoğraf Seç</span>
+                            </button>
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Kapak Resmi (URL)</label>
-                        <input type="text" id="form-banner" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Kapak Resmi / Arka Plan</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="form-banner" placeholder="https://... veya Görsel Seçin" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                            <input type="file" id="admin-banner-file" accept="image/*" class="hidden" onchange="handleAdminBannerFileSelect(event)">
+                            <button type="button" onclick="document.getElementById('admin-banner-file').click()" class="bg-purple-600/30 hover:bg-purple-600 text-purple-300 hover:text-white px-3 py-2.5 rounded-xl border border-purple-500/30 transition text-xs font-bold shrink-0 flex items-center space-x-1">
+                                <i class="fa-solid fa-upload"></i>
+                                <span>Kapak Seç</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 

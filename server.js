@@ -500,12 +500,54 @@ app.post('/api/orders', (req, res) => {
         links.push({ title: 'WhatsApp ile İletişim', url: `https://wa.me/${cleanPhone}`, icon: 'whatsapp' });
     }
 
+    // Yardımcı: Link İkonu ve Başlık Otomatik Tamamlama
+    function autoDetectIconAndTitle(cl) {
+        if (!cl || !cl.url) return null;
+        let url = cl.url.trim();
+        if (!url) return null;
+        const formattedUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
+        const lowerUrl = formattedUrl.toLowerCase();
+        let icon = cl.icon || 'globe';
+
+        if (!cl.icon || cl.icon === 'link' || cl.icon === 'globe') {
+            if (lowerUrl.includes('tiktok.com')) icon = 'tiktok';
+            else if (lowerUrl.includes('instagram.com')) icon = 'instagram';
+            else if (lowerUrl.includes('wa.me') || lowerUrl.includes('whatsapp.com')) icon = 'whatsapp';
+            else if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) icon = 'youtube';
+            else if (lowerUrl.includes('linkedin.com')) icon = 'linkedin';
+            else if (lowerUrl.includes('facebook.com')) icon = 'facebook';
+            else if (lowerUrl.includes('twitter.com') || lowerUrl.includes('x.com')) icon = 'twitter';
+            else if (lowerUrl.includes('maps.google.com') || lowerUrl.includes('goo.gl/maps')) icon = 'google';
+        }
+
+        let title = cl.title ? cl.title.trim() : '';
+        if (!title) {
+            const titleMap = {
+                'tiktok': 'TikTok Hesabım',
+                'instagram': 'Instagram Hesabım',
+                'whatsapp': 'WhatsApp ile İletişim',
+                'google': 'Google Harita & Yorum Yap',
+                'globe': 'Web Sitem',
+                'phone': 'Telefon Numarası',
+                'email': 'E-posta Adresi',
+                'map': 'Konum / Adres',
+                'linkedin': 'LinkedIn Profili',
+                'youtube': 'YouTube Kanalım',
+                'facebook': 'Facebook Sayfam',
+                'twitter': 'X (Twitter) Hesabım'
+            };
+            title = titleMap[icon] || 'Web Bağlantısı';
+        }
+
+        return { title, url: formattedUrl, icon };
+    }
+
     // Özel eklenen custom linkler (Web sitesi, Katalog, vb.)
     if (Array.isArray(req.body.customLinks)) {
         req.body.customLinks.forEach(cl => {
-            if (cl.title && cl.url) {
-                const formattedUrl = cl.url.startsWith('http') ? cl.url : `https://${cl.url}`;
-                links.push({ title: cl.title, url: formattedUrl, icon: 'link' });
+            const parsed = autoDetectIconAndTitle(cl);
+            if (parsed) {
+                links.push(parsed);
             }
         });
     }
@@ -1021,6 +1063,24 @@ app.get('/p/:id', (req, res) => {
         } catch(e) {}
     }
     res.sendFile(pubProf);
+});
+
+app.get('/order', (req, res) => {
+    const rootOrder = path.join(__dirname, 'order.html');
+    const pubOrder = path.join(__dirname, 'public', 'order.html');
+    if (fs.existsSync(rootOrder)) {
+        try {
+            const rootContent = fs.readFileSync(rootOrder, 'utf8');
+            if (rootContent.includes('TR53 0001 2001 5530 0001 1062 98')) return res.sendFile(rootOrder);
+        } catch(e) {}
+    }
+    if (fs.existsSync(pubOrder)) {
+        try {
+            const pubContent = fs.readFileSync(pubOrder, 'utf8');
+            if (pubContent.includes('TR53 0001 2001 5530 0001 1062 98')) return res.sendFile(pubOrder);
+        } catch(e) {}
+    }
+    res.sendFile(pubOrder);
 });
 
 app.get('/', (req, res) => {

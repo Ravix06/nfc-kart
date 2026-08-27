@@ -529,6 +529,77 @@ function toggleAdminAppointmentFields() {
     }
 }
 
+function handleAdminAvatarFileSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX_SIZE = 500;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > MAX_SIZE) {
+                    height *= MAX_SIZE / width;
+                    width = MAX_SIZE;
+                }
+            } else {
+                if (height > MAX_SIZE) {
+                    width *= MAX_SIZE / height;
+                    height = MAX_SIZE;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const base64 = canvas.toDataURL('image/jpeg', 0.85);
+            document.getElementById('form-avatar').value = base64;
+            showToast("Profil fotoğrafı yüklendi ve tüm cihazlar (telefon/mobil) için optimize edildi! 📸", "success");
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function handleAdminBannerFileSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 1200;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const base64 = canvas.toDataURL('image/jpeg', 0.85);
+            document.getElementById('form-banner').value = base64;
+            showToast("Kapak resmi yüklendi ve tüm cihazlar (telefon/mobil) için optimize edildi! 🖼️", "success");
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
 /* Detaylı Profil Ekle / Düzenle */
 function openNewProfileModal() {
     document.getElementById('modal-title').innerText = 'Yeni Kart Profili Oluştur';
@@ -601,6 +672,24 @@ function closeProfileModal() {
     document.getElementById('profile-modal').classList.add('hidden');
 }
 
+function getPlatformDefaultTitle(icon) {
+    const map = {
+        'tiktok': 'TikTok Hesabım',
+        'instagram': 'Instagram Hesabım',
+        'whatsapp': 'WhatsApp ile İletişim',
+        'google': 'Google Harita & Yorum Yap',
+        'globe': 'Web Sitem',
+        'phone': 'Telefon Numarası',
+        'email': 'E-posta Adresi',
+        'map': 'Konum / Adres',
+        'linkedin': 'LinkedIn Profili',
+        'youtube': 'YouTube Kanalım',
+        'facebook': 'Facebook Sayfam',
+        'twitter': 'X (Twitter) Hesabım'
+    };
+    return map[icon] || 'Sosyal Medya / Bağlantı';
+}
+
 function addLinkRow(title = '', url = '', icon = 'globe') {
     const container = document.getElementById('form-links-container');
     const row = document.createElement('div');
@@ -608,6 +697,7 @@ function addLinkRow(title = '', url = '', icon = 'globe') {
     row.innerHTML = `
         <select class="link-icon bg-slate-900 border border-slate-800 text-xs text-white rounded-lg px-2 py-2 focus:outline-none">
             <option value="globe" ${icon === 'globe' ? 'selected' : ''}>🌐 Web</option>
+            <option value="tiktok" ${icon === 'tiktok' ? 'selected' : ''}>🎵 TikTok</option>
             <option value="instagram" ${icon === 'instagram' ? 'selected' : ''}>📷 Instagram</option>
             <option value="google" ${icon === 'google' ? 'selected' : ''}>⭐ Google Yorum</option>
             <option value="whatsapp" ${icon === 'whatsapp' ? 'selected' : ''}>💬 WhatsApp</option>
@@ -616,8 +706,10 @@ function addLinkRow(title = '', url = '', icon = 'globe') {
             <option value="map" ${icon === 'map' ? 'selected' : ''}>📍 Konum/Harita</option>
             <option value="linkedin" ${icon === 'linkedin' ? 'selected' : ''}>💼 LinkedIn</option>
             <option value="youtube" ${icon === 'youtube' ? 'selected' : ''}>▶️ YouTube</option>
+            <option value="facebook" ${icon === 'facebook' ? 'selected' : ''}>📘 Facebook</option>
+            <option value="twitter" ${icon === 'twitter' ? 'selected' : ''}>🐦 X (Twitter)</option>
         </select>
-        <input type="text" placeholder="Başlık" value="${title}" class="link-title bg-slate-900 border border-slate-800 text-xs text-white rounded-lg px-3 py-2 w-1/3 focus:outline-none focus:border-indigo-500">
+        <input type="text" placeholder="Başlık (Opsiyonel)" value="${title}" class="link-title bg-slate-900 border border-slate-800 text-xs text-white rounded-lg px-3 py-2 w-1/3 focus:outline-none focus:border-indigo-500">
         <input type="url" placeholder="https://..." value="${url}" class="link-url bg-slate-900 border border-slate-800 text-xs font-mono text-emerald-400 rounded-lg px-3 py-2 flex-grow focus:outline-none focus:border-indigo-500">
         <button type="button" onclick="this.parentElement.remove()" class="text-slate-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
     `;
@@ -644,10 +736,13 @@ async function handleProfileSubmit(e) {
     const linkRows = document.querySelectorAll('.link-row');
     const links = [];
     linkRows.forEach(row => {
-        const title = row.querySelector('.link-title').value.trim();
+        let title = row.querySelector('.link-title').value.trim();
         const url = row.querySelector('.link-url').value.trim();
         const icon = row.querySelector('.link-icon').value;
-        if (title && url) {
+        if (url) {
+            if (!title) {
+                title = getPlatformDefaultTitle(icon);
+            }
             links.push({ title, url, icon });
         }
     });

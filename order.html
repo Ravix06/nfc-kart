@@ -368,10 +368,10 @@
                     <span id="modal-total-badge" class="text-[10px] bg-amber-500/20 px-2.5 py-0.5 rounded-full font-bold">1.000 TL</span>
                 </div>
                 <div class="text-xs text-slate-300 space-y-1 font-mono">
-                    <div><strong>Alıcı Hesabı:</strong> NFC KART CNR / RUKEN</div>
+                    <div><strong>Alıcı Hesabı:</strong> Ruken Ceylan</div>
                     <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 my-1">
-                        <span id="iban-text-val" class="text-emerald-400 font-bold tracking-wider select-all text-xs">TR00 0000 0000 0000 0000 0000 00</span>
-                        <button type="button" onclick="copyToClipboard('TR000000000000000000000000', 'IBAN Kopyalandı!')" class="text-slate-300 hover:text-white bg-slate-800 px-2 py-1 rounded-lg text-xs">
+                        <span id="iban-text-val" class="text-emerald-400 font-bold tracking-wider select-all text-xs">TR53 0001 2001 5530 0001 1062 98</span>
+                        <button type="button" onclick="copyToClipboard('TR530001200155300001106298', 'IBAN Kopyalandı!')" class="text-slate-300 hover:text-white bg-slate-800 px-2 py-1 rounded-lg text-xs">
                             <i class="fa-solid fa-copy mr-1"></i>Kopyala
                         </button>
                     </div>
@@ -462,9 +462,27 @@
             updateTotalPrice();
         }
 
+        function getPlatformDefaultTitle(icon) {
+            const map = {
+                'tiktok': 'TikTok Hesabım',
+                'instagram': 'Instagram Hesabım',
+                'whatsapp': 'WhatsApp ile İletişim',
+                'google': 'Google Harita & Yorum Yap',
+                'globe': 'Web Sitem',
+                'phone': 'Telefon Numarası',
+                'email': 'E-posta Adresi',
+                'map': 'Konum / Adres',
+                'linkedin': 'LinkedIn Profili',
+                'youtube': 'YouTube Kanalım',
+                'facebook': 'Facebook Sayfam',
+                'twitter': 'X (Twitter) Hesabım'
+            };
+            return map[icon] || 'Sosyal Medya / Bağlantı';
+        }
+
         let customLinkCounter = 0;
 
-        function addOrderCustomLink(title = '', url = '') {
+        function addOrderCustomLink(title = '', url = '', icon = 'tiktok') {
             customLinkCounter++;
             const container = document.getElementById('ord-custom-links-container');
             const rowId = `custom-link-row-${customLinkCounter}`;
@@ -473,10 +491,26 @@
             div.id = rowId;
             div.className = 'grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-950 p-2.5 rounded-xl border border-slate-800 animate-fadeIn';
             div.innerHTML = `
-                <div class="sm:col-span-5">
-                    <input type="text" class="ord-custom-link-title w-full bg-slate-900 border border-slate-700/60 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500" placeholder="Başlık (Örn: Web Sitem, LinkedIn)" value="${title}">
+                <div class="sm:col-span-3">
+                    <select class="ord-custom-link-icon w-full bg-slate-900 border border-slate-700/60 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <option value="tiktok" ${icon === 'tiktok' ? 'selected' : ''}>🎵 TikTok</option>
+                        <option value="instagram" ${icon === 'instagram' ? 'selected' : ''}>📷 Instagram</option>
+                        <option value="whatsapp" ${icon === 'whatsapp' ? 'selected' : ''}>💬 WhatsApp</option>
+                        <option value="globe" ${icon === 'globe' ? 'selected' : ''}>🌐 Web Sitem</option>
+                        <option value="google" ${icon === 'google' ? 'selected' : ''}>⭐ Google Yorum</option>
+                        <option value="youtube" ${icon === 'youtube' ? 'selected' : ''}>▶️ YouTube</option>
+                        <option value="linkedin" ${icon === 'linkedin' ? 'selected' : ''}>💼 LinkedIn</option>
+                        <option value="facebook" ${icon === 'facebook' ? 'selected' : ''}>📘 Facebook</option>
+                        <option value="twitter" ${icon === 'twitter' ? 'selected' : ''}>🐦 X (Twitter)</option>
+                        <option value="map" ${icon === 'map' ? 'selected' : ''}>📍 Konum/Harita</option>
+                        <option value="phone" ${icon === 'phone' ? 'selected' : ''}>📞 Telefon</option>
+                        <option value="email" ${icon === 'email' ? 'selected' : ''}>✉️ E-posta</option>
+                    </select>
                 </div>
-                <div class="sm:col-span-6">
+                <div class="sm:col-span-4">
+                    <input type="text" class="ord-custom-link-title w-full bg-slate-900 border border-slate-700/60 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500" placeholder="Başlık (Opsiyonel)" value="${title}">
+                </div>
+                <div class="sm:col-span-4">
                     <input type="url" class="ord-custom-link-url w-full bg-slate-900 border border-slate-700/60 rounded-lg px-3 py-1.5 text-xs font-mono text-emerald-400 placeholder-slate-500 focus:outline-none focus:border-indigo-500" placeholder="https://..." value="${url}">
                 </div>
                 <div class="sm:col-span-1 text-right">
@@ -579,10 +613,14 @@
             const customLinkRows = document.querySelectorAll('#ord-custom-links-container > div');
             const customLinks = [];
             customLinkRows.forEach(row => {
-                const titleVal = row.querySelector('.ord-custom-link-title').value.trim();
-                const urlVal = row.querySelector('.ord-custom-link-url').value.trim();
-                if (titleVal && urlVal) {
-                    customLinks.push({ title: titleVal, url: urlVal, icon: 'link' });
+                const iconVal = row.querySelector('.ord-custom-link-icon')?.value || 'globe';
+                let titleVal = row.querySelector('.ord-custom-link-title')?.value.trim() || '';
+                const urlVal = row.querySelector('.ord-custom-link-url')?.value.trim() || '';
+                if (urlVal) {
+                    if (!titleVal) {
+                        titleVal = getPlatformDefaultTitle(iconVal);
+                    }
+                    customLinks.push({ title: titleVal, url: urlVal, icon: iconVal });
                 }
             });
 

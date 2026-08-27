@@ -38,9 +38,9 @@
     ],
     "ibans": [
       {
-        "bank": "Halkbank / Ziraat",
-        "name": "Ruken Ceylan",
-        "iban": "TR53 0001 2001 5530 0001 1062 98"
+        "bank": "Ziraat Bankası",
+        "name": "Çınar Ceylan",
+        "iban": "TR00 0000 0000 0000 0000 0000 00"
       }
     ],
     "views": 12,

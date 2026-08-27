@@ -192,7 +192,20 @@
             }
         }
 
-        function getIconClass(icon) {
+        function getIconClass(icon, url = '') {
+            let effIcon = icon || 'globe';
+            const lowerUrl = (url || '').toLowerCase();
+            if (!icon || icon === 'link' || icon === 'globe') {
+                if (lowerUrl.includes('tiktok.com')) effIcon = 'tiktok';
+                else if (lowerUrl.includes('instagram.com')) effIcon = 'instagram';
+                else if (lowerUrl.includes('wa.me') || lowerUrl.includes('whatsapp.com')) effIcon = 'whatsapp';
+                else if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) effIcon = 'youtube';
+                else if (lowerUrl.includes('linkedin.com')) effIcon = 'linkedin';
+                else if (lowerUrl.includes('facebook.com')) effIcon = 'facebook';
+                else if (lowerUrl.includes('twitter.com') || lowerUrl.includes('x.com')) effIcon = 'twitter';
+                else if (lowerUrl.includes('maps.google.com') || lowerUrl.includes('goo.gl/maps')) effIcon = 'google';
+            }
+
             const map = {
                 'instagram': 'fa-brands fa-instagram text-pink-500',
                 'google': 'fa-brands fa-google text-red-400',
@@ -207,7 +220,7 @@
                 'email': 'fa-solid fa-envelope text-amber-400',
                 'map': 'fa-solid fa-map-location-dot text-rose-500'
             };
-            return map[icon] || 'fa-solid fa-link text-indigo-400';
+            return map[effIcon] || 'fa-solid fa-link text-indigo-400';
         }
 
         function renderProfile(p) {
@@ -223,15 +236,25 @@
                 document.getElementById('profile-location-wrapper').classList.remove('hidden');
             }
 
-            if (p.avatar) {
-                document.getElementById('profile-avatar').src = p.avatar;
+            const defaultAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80';
+            const defaultBanner = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80';
+
+            const avatarEl = document.getElementById('profile-avatar');
+            avatarEl.onerror = function() { this.src = defaultAvatar; };
+            if (p.avatar && !p.avatar.startsWith('file:') && !p.avatar.startsWith('C:') && !p.avatar.includes('localhost') && !p.avatar.includes('127.0.0.1')) {
+                avatarEl.src = p.avatar;
+            } else {
+                avatarEl.src = defaultAvatar;
             }
 
-            if (p.banner) {
-                const bannerEl = document.getElementById('profile-banner');
+            const bannerEl = document.getElementById('profile-banner');
+            bannerEl.onerror = function() { this.src = defaultBanner; };
+            if (p.banner && !p.banner.startsWith('file:') && !p.banner.startsWith('C:') && !p.banner.includes('localhost') && !p.banner.includes('127.0.0.1')) {
                 bannerEl.src = p.banner;
-                bannerEl.classList.remove('hidden');
+            } else {
+                bannerEl.src = defaultBanner;
             }
+            bannerEl.classList.remove('hidden');
 
             // vCard Download Link
             document.getElementById('vcard-btn').href = `/api/vcard/${p.id}`;
@@ -265,7 +288,7 @@
             
             if (p.links && p.links.length > 0) {
                 p.links.forEach(link => {
-                    const iconClass = getIconClass(link.icon);
+                    const iconClass = getIconClass(link.icon, link.url);
                     const a = document.createElement('a');
                     a.href = link.url;
                     a.target = "_blank";
