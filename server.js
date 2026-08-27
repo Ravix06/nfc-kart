@@ -661,7 +661,21 @@ app.get('/', (req, res) => {
 });
 
 app.get('/order', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'order.html'));
+    const rootOrder = path.join(__dirname, 'order.html');
+    const pubOrder = path.join(__dirname, 'public', 'order.html');
+    if (fs.existsSync(rootOrder)) {
+        try {
+            const rootContent = fs.readFileSync(rootOrder, 'utf8');
+            if (rootContent.includes('700 TL')) return res.sendFile(rootOrder);
+        } catch(e) {}
+    }
+    if (fs.existsSync(pubOrder)) {
+        try {
+            const pubContent = fs.readFileSync(pubOrder, 'utf8');
+            if (pubContent.includes('700 TL')) return res.sendFile(pubOrder);
+        } catch(e) {}
+    }
+    res.sendFile(pubOrder);
 });
 
 app.get('/my-orders', (req, res) => {
