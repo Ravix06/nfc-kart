@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dijital Kartvizit</title>
+
+    <!-- PWA & Mobile App Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/9374/9374972.png">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- QRCodeJS CDN for QR Code Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body id="body-wrapper" class="bg-slate-950 text-slate-100 min-h-screen flex justify-center selection:bg-indigo-500 selection:text-white pb-12">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 z-50 transform -translate-y-20 opacity-0 bg-slate-800 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center space-x-3 pointer-events-none">
+        <i id="toast-icon" class="fa-solid fa-check-circle text-emerald-400 text-lg"></i>
+        <span id="toast-message" class="text-sm font-medium">İşlem başarılı</span>
+    </div>
+
+    <!-- Mobile Card Container -->
+    <div class="w-full max-w-md bg-slate-900/90 sm:my-6 sm:rounded-3xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col relative">
+
+        <!-- Banner Header -->
+        <div class="h-36 sm:h-44 w-full bg-gradient-to-r from-indigo-900 via-slate-900 to-purple-900 relative overflow-hidden">
+            <img id="profile-banner" src="" alt="Banner" class="w-full h-full object-cover opacity-60 hidden">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
+            
+            <!-- Views & QR Share Button -->
+            <div class="absolute top-4 right-4 flex items-center space-x-2">
+                <button onclick="openQRModal()" class="w-10 h-10 rounded-full bg-slate-900/60 backdrop-blur border border-slate-700 text-slate-200 flex items-center justify-center hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-qrcode text-base"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Avatar & Main Info -->
+        <div class="px-6 relative -mt-16 flex flex-col items-center text-center">
+            <div class="relative group">
+                <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl p-1 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 shadow-2xl">
+                    <img id="profile-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80" alt="Avatar" class="w-full h-full object-cover rounded-[22px] bg-slate-800">
+                </div>
+            </div>
+
+            <h1 id="profile-name" class="text-2xl sm:text-3xl font-extrabold mt-4 text-white tracking-tight">Yükleniyor...</h1>
+            <p id="profile-title" class="text-indigo-400 font-semibold text-sm sm:text-base mt-1"></p>
+            <p id="profile-company" class="text-slate-400 text-xs sm:text-sm font-medium"></p>
+            
+            <div id="profile-location-wrapper" class="inline-flex items-center space-x-1.5 text-xs text-slate-400 mt-2 bg-slate-800/60 px-3 py-1 rounded-full border border-slate-700/60 hidden">
+                <i class="fa-solid fa-location-dot text-indigo-400"></i>
+                <span id="profile-location"></span>
+            </div>
+
+            <p id="profile-bio" class="text-slate-300 text-sm mt-4 leading-relaxed max-w-xs italic"></p>
+
+            <!-- Save to Contacts Button (vCard) -->
+            <a id="vcard-btn" href="#" class="mt-6 w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-base shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-3 transition transform active:scale-95">
+                <i class="fa-solid fa-user-plus text-lg"></i>
+                <span>Rehbere Kaydet (.vcf)</span>
+            </a>
+
+            <!-- Online Randevu Al Butonu -->
+            <button id="btn-open-appointment" onclick="openProfileAppointmentModal()" class="mt-3 w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 transition transform active:scale-95">
+                <i class="fa-solid fa-calendar-check text-amber-300 text-base"></i>
+                <span>📅 Online Randevu Oluştur</span>
+            </button>
+
+            <!-- Quick Action Grid (Call, Email, WhatsApp) -->
+            <div class="grid grid-cols-3 gap-3 w-full mt-4">
+                <a id="btn-call" href="#" class="glass-card hover:bg-slate-800 py-3 rounded-2xl flex flex-col items-center justify-center space-y-1 transition text-slate-200 border border-slate-800">
+                    <i class="fa-solid fa-phone text-emerald-400 text-lg"></i>
+                    <span class="text-xs font-semibold">Hemen Ara</span>
+                </a>
+                <a id="btn-email" href="#" class="glass-card hover:bg-slate-800 py-3 rounded-2xl flex flex-col items-center justify-center space-y-1 transition text-slate-200 border border-slate-800">
+                    <i class="fa-solid fa-envelope text-sky-400 text-lg"></i>
+                    <span class="text-xs font-semibold">E-posta</span>
+                </a>
+                <a id="btn-whatsapp" href="#" target="_blank" class="glass-card hover:bg-slate-800 py-3 rounded-2xl flex flex-col items-center justify-center space-y-1 transition text-slate-200 border border-slate-800">
+                    <i class="fa-brands fa-whatsapp text-emerald-500 text-xl"></i>
+                    <span class="text-xs font-semibold">WhatsApp</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Links Section -->
+        <div class="px-6 mt-6 flex-grow">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1">Sosyal Medya & Bağlantılar</h3>
+            <div id="links-container" class="space-y-3">
+                <!-- Links dynamically rendered here -->
+            </div>
+
+            <!-- IBAN Section -->
+            <div id="iban-section" class="mt-6 hidden">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1">Banka & IBAN Bilgileri</h3>
+                <div id="iban-container" class="space-y-3">
+                    <!-- IBAN cards rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Viral Footer Branding -->
+        <div class="mt-8 px-6 py-4 bg-slate-950/80 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400 text-center">
+            <span class="flex items-center space-x-1.5">
+                <i class="fa-solid fa-eye text-indigo-400"></i>
+                <span id="view-count">0</span> kez görüntülendi
+            </span>
+            <div class="flex items-center space-x-1 font-medium">
+                <span>Bu kartı <strong class="text-white font-bold">NFC KART CNR</strong> yaptı.</span>
+                <a href="/order" class="bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-slate-950 font-black px-2.5 py-1 rounded-lg transition transform hover:scale-105 shadow-md shadow-amber-500/20 ml-1">
+                    Sen de Al 🚀
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qr-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 text-center relative shadow-2xl">
+            <button onclick="closeQRModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-xl font-bold text-white mb-2">QR Kodu Okutun</h3>
+            <p class="text-xs text-slate-400 mb-6">Kartı olmayan kişilere profilinizi okutmak için bu QR kodu kullanabilirsiniz.</p>
+            <div class="flex justify-center p-4 bg-white rounded-2xl shadow-inner mb-4">
+                <div id="qrcode"></div>
+            </div>
+            <button onclick="copyProfileURL()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm transition">
+                <i class="fa-solid fa-copy mr-2"></i> Profil Bağlantısını Kopyala
+            </button>
+        </div>
+    </div>
+
+    <!-- Page Script -->
+    <script>
+        let currentProfile = null;
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(err => console.log(err));
+        }
+
+        // Extract Profile ID from URL (/p/:id)
+        function getProfileId() {
+            const pathParts = window.location.pathname.split('/');
+            const pIndex = pathParts.indexOf('p');
+            if (pIndex !== -1 && pathParts[pIndex + 1]) {
+                return pathParts[pIndex + 1];
+            }
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id') || 'ahmet-yilmaz';
+        }
+
+        async function loadProfile() {
+            const id = getProfileId();
+            try {
+                const response = await fetch(`/api/profiles/${id}`);
+                if (!response.ok) {
+                    document.getElementById('profile-name').innerText = 'Profil Bulunamadı';
+                    return;
+                }
+                currentProfile = await response.json();
+                renderProfile(currentProfile);
+            } catch (err) {
+                console.error("Profil yüklenirken hata:", err);
+                document.getElementById('profile-name').innerText = 'Sunucu Hatası';
+            }
+        }
+
+        function getIconClass(icon, url = '') {
+            let effIcon = icon || 'globe';
+            const lowerUrl = (url || '').toLowerCase();
+            if (!icon || icon === 'link' || icon === 'globe') {
+                if (lowerUrl.includes('tiktok.com')) effIcon = 'tiktok';
+                else if (lowerUrl.includes('instagram.com')) effIcon = 'instagram';
+                else if (lowerUrl.includes('wa.me') || lowerUrl.includes('whatsapp.com')) effIcon = 'whatsapp';
+                else if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) effIcon = 'youtube';
+                else if (lowerUrl.includes('linkedin.com')) effIcon = 'linkedin';
+                else if (lowerUrl.includes('facebook.com')) effIcon = 'facebook';
+                else if (lowerUrl.includes('twitter.com') || lowerUrl.includes('x.com')) effIcon = 'twitter';
+                else if (lowerUrl.includes('maps.google.com') || lowerUrl.includes('goo.gl/maps')) effIcon = 'google';
+            }
+
+            const map = {
+                'instagram': 'fa-brands fa-instagram text-pink-500',
+                'google': 'fa-brands fa-google text-red-400',
+                'whatsapp': 'fa-brands fa-whatsapp text-emerald-500',
+                'linkedin': 'fa-brands fa-linkedin text-sky-500',
+                'facebook': 'fa-brands fa-facebook text-blue-600',
+                'youtube': 'fa-brands fa-youtube text-red-500',
+                'twitter': 'fa-brands fa-x-twitter text-slate-200',
+                'tiktok': 'fa-brands fa-tiktok text-slate-100',
+                'globe': 'fa-solid fa-globe text-indigo-400',
+                'phone': 'fa-solid fa-phone text-emerald-400',
+                'email': 'fa-solid fa-envelope text-amber-400',
+                'map': 'fa-solid fa-map-location-dot text-rose-500'
+            };
+            return map[effIcon] || 'fa-solid fa-link text-indigo-400';
+        }
+
+        function renderProfile(p) {
+            document.title = `${p.name} - Dijital Kartvizit`;
+            document.getElementById('profile-name').innerText = p.name || '';
+            document.getElementById('profile-title').innerText = p.title || '';
+            document.getElementById('profile-company').innerText = p.company || '';
+            document.getElementById('profile-bio').innerText = p.bio ? `"${p.bio}"` : '';
+            document.getElementById('view-count').innerText = p.views || 1;
+
+            if (p.location) {
+                document.getElementById('profile-location').innerText = p.location;
+                document.getElementById('profile-location-wrapper').classList.remove('hidden');
+            }
+
+            const defaultAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80';
+            const defaultBanner = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80';
+
+            const avatarEl = document.getElementById('profile-avatar');
+            avatarEl.onerror = function() { this.src = defaultAvatar; };
+            if (p.avatar && !p.avatar.startsWith('file:') && !p.avatar.startsWith('C:') && !p.avatar.includes('localhost') && !p.avatar.includes('127.0.0.1')) {
+                avatarEl.src = p.avatar;
+            } else {
+                avatarEl.src = defaultAvatar;
+            }
+
+            const bannerEl = document.getElementById('profile-banner');
+            bannerEl.onerror = function() { this.src = defaultBanner; };
+            if (p.banner && !p.banner.startsWith('file:') && !p.banner.startsWith('C:') && !p.banner.includes('localhost') && !p.banner.includes('127.0.0.1')) {
+                bannerEl.src = p.banner;
+            } else {
+                bannerEl.src = defaultBanner;
+            }
+            bannerEl.classList.remove('hidden');
+
+            // vCard Download Link
+            document.getElementById('vcard-btn').href = `/api/vcard/${p.id}`;
+
+            // Quick Call / Email / WhatsApp buttons
+            if (p.phone) {
+                document.getElementById('btn-call').href = `tel:${p.phone.replace(/\s+/g, '')}`;
+            } else {
+                document.getElementById('btn-call').classList.add('opacity-40', 'pointer-events-none');
+            }
+
+            if (p.email) {
+                document.getElementById('btn-email').href = `mailto:${p.email}`;
+            } else {
+                document.getElementById('btn-email').classList.add('opacity-40', 'pointer-events-none');
+            }
+
+            const waLink = p.links.find(l => l.icon === 'whatsapp' || l.url.includes('wa.me'));
+            if (waLink) {
+                document.getElementById('btn-whatsapp').href = waLink.url;
+            } else if (p.phone) {
+                const cleanPhone = p.phone.replace(/[^0-9]/g, '');
+                document.getElementById('btn-whatsapp').href = `https://wa.me/${cleanPhone}`;
+            } else {
+                document.getElementById('btn-whatsapp').classList.add('opacity-40', 'pointer-events-none');
+            }
+
+            // Render Links
+            const container = document.getElementById('links-container');
+            container.innerHTML = '';
+            
+            if (p.links && p.links.length > 0) {
+                p.links.forEach(link => {
+                    const iconClass = getIconClass(link.icon, link.url);
+                    const a = document.createElement('a');
+                    a.href = link.url;
+                    a.target = "_blank";
+                    a.className = "link-card glass-card hover:bg-slate-800/90 p-4 rounded-2xl border border-slate-800/80 flex items-center justify-between text-slate-100 group";
+                    a.innerHTML = `
+                        <div class="flex items-center space-x-3.5">
+                            <div class="w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-center text-lg group-hover:scale-110 transition">
+                                <i class="${iconClass}"></i>
+                            </div>
+                            <span class="font-semibold text-sm sm:text-base">${link.title}</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-xs text-slate-400 group-hover:translate-x-1 transition"></i>
+                    `;
+                    container.appendChild(a);
+                });
+            } else {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-4">Henüz eklenmiş bağlantı yok.</p>`;
+            }
+
+            // Render IBANs
+            if (p.ibans && p.ibans.length > 0) {
+                document.getElementById('iban-section').classList.remove('hidden');
+                const ibanContainer = document.getElementById('iban-container');
+                ibanContainer.innerHTML = '';
+                p.ibans.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = "glass-card p-4 rounded-2xl border border-slate-800 flex flex-col space-y-2";
+                    div.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-xs text-indigo-400 uppercase tracking-wider">${item.bank || 'Banka'}</span>
+                            <span class="text-xs text-slate-400 font-medium">${item.name || ''}</span>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                            <code class="text-xs sm:text-sm font-mono text-slate-200 select-all">${item.iban}</code>
+                            <button onclick="copyToClipboard('${item.iban}', 'IBAN kopyalandı!')" class="ml-2 text-xs bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white px-2.5 py-1 rounded-lg transition font-medium">
+                                <i class="fa-solid fa-copy"></i>
+                            </button>
+                        </div>
+                    `;
+                    ibanContainer.appendChild(div);
+                });
+            }
+
+            // Generate QR Code
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: window.location.href,
+                width: 180,
+                height: 180,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+
+        function copyToClipboard(text, message) {
+            navigator.clipboard.writeText(text);
+            showToast(message || 'Kopyalandı!');
+        }
+
+        function copyProfileURL() {
+            copyToClipboard(window.location.href, 'Profil adresi kopyalandı!');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.remove('-translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        function openQRModal() {
+            document.getElementById('qr-modal').classList.remove('hidden');
+        }
+
+        function closeQRModal() {
+            document.getElementById('qr-modal').classList.add('hidden');
+        }
+
+        function openProfileAppointmentModal() {
+            if (currentProfile) {
+                document.getElementById('app-modal-biz-name').innerText = currentProfile.company || currentProfile.name;
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('app-cust-date').value = today;
+            }
+            document.getElementById('profile-app-modal').classList.remove('hidden');
+        }
+
+        function closeProfileAppointmentModal() {
+            document.getElementById('profile-app-modal').classList.add('hidden');
+        }
+
+        async function handleProfileAppointmentSubmit(e) {
+            e.preventDefault();
+            if (!currentProfile) return;
+
+            const cName = document.getElementById('app-cust-name').value.trim();
+            const cPhone = document.getElementById('app-cust-phone').value.trim();
+            const cDate = document.getElementById('app-cust-date').value;
+            const cTime = document.getElementById('app-cust-time').value;
+            const cNote = document.getElementById('app-cust-note').value.trim();
+
+            const bizName = currentProfile.company || currentProfile.name;
+            let targetPhone = (currentProfile.phone || '05078405206').replace(/[^0-9]/g, '');
+            if (targetPhone.startsWith('0')) targetPhone = '9' + targetPhone;
+            if (!targetPhone.startsWith('90') && targetPhone.length === 10) targetPhone = '90' + targetPhone;
+
+            try {
+                await fetch('/api/appointments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        profileId: currentProfile.id,
+                        businessName: bizName,
+                        customerName: cName,
+                        customerPhone: cPhone,
+                        date: cDate,
+                        time: cTime,
+                        note: cNote
+                    })
+                });
+            } catch (err) {}
+
+            closeProfileAppointmentModal();
+            showToast('Randevu oluşturuldu! WhatsApp açılıyor...', 'success');
+
+            const waText = encodeURIComponent(`🚨 YENİ RANDEVU TALEBİ! 🚨\n\nSayın ${bizName},\nBen ${cName}.\n\n📅 Tarih: ${cDate}\n⏰ Saat: ${cTime}\n📞 Müşteri Telefonum: ${cPhone}\n📝 Notum: ${cNote || 'Yok'}\n\nRandevumu onaylamak için mesajımı yanıtlayabilirsiniz.`);
+            window.open(`https://wa.me/${targetPhone}?text=${waText}`, '_blank');
+        }
+
+        document.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+
+    <!-- Müşteri Randevu Alma Modalı -->
+    <div id="profile-app-modal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl relative">
+            <button onclick="closeProfileAppointmentModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-xl mx-auto mb-2 border border-emerald-500/30">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </div>
+                <h3 class="text-lg font-black text-white">Online Randevu Oluştur</h3>
+                <p id="app-modal-biz-name" class="text-xs text-slate-400 mt-0.5">Tarih ve saat dilimi seçin.</p>
+            </div>
+
+            <form onsubmit="handleProfileAppointmentSubmit(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Adınız Soyadınız *</label>
+                    <input type="text" id="app-cust-name" required placeholder="Ahmet Yılmaz" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Telefon Numarası *</label>
+                    <input type="text" id="app-cust-phone" required placeholder="0532 123 45 67" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Tarih *</label>
+                        <input type="date" id="app-cust-date" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Saat Dilimi *</label>
+                        <select id="app-cust-time" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                            <option value="10:00">10:00</option>
+                            <option value="11:00">11:00</option>
+                            <option value="12:00">12:00</option>
+                            <option value="14:00">14:00</option>
+                            <option value="15:00">15:00</option>
+                            <option value="16:00">16:00</option>
+                            <option value="17:00">17:00</option>
+                            <option value="18:00">18:00</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Randevu Notu (Opsiyonel)</label>
+                    <input type="text" id="app-cust-note" placeholder="Saç kesimi / Danışmanlık vb." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg transition flex items-center justify-center space-x-2 mt-2">
+                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                    <span>Randevu Oluştur & WhatsApp'tan Gönder</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
