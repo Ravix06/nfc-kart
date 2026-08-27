@@ -26,6 +26,61 @@ const NOTIFY_PHONE = '05078405206';
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Smart Page Overrides (Express.static öncesinde çalışarak her zaman güncel dosyayı sunar)
+app.get('/', (req, res) => {
+    const rootIndex = path.join(__dirname, 'index.html');
+    const pubIndex = path.join(__dirname, 'public', 'index.html');
+    if (fs.existsSync(rootIndex)) {
+        try {
+            const rootContent = fs.readFileSync(rootIndex, 'utf8');
+            if (rootContent.includes('İşletme Randevu Girişi')) return res.sendFile(rootIndex);
+        } catch(e) {}
+    }
+    if (fs.existsSync(pubIndex)) {
+        try {
+            const pubContent = fs.readFileSync(pubIndex, 'utf8');
+            if (pubContent.includes('İşletme Randevu Girişi')) return res.sendFile(pubIndex);
+        } catch(e) {}
+    }
+    res.sendFile(pubIndex);
+});
+
+app.get('/admin', (req, res) => {
+    const rootAdmin = path.join(__dirname, 'admin.html');
+    const pubAdmin = path.join(__dirname, 'public', 'admin.html');
+    if (fs.existsSync(rootAdmin)) {
+        try {
+            const rootContent = fs.readFileSync(rootAdmin, 'utf8');
+            if (rootContent.includes('Aktif Randevu Sistemleri')) return res.sendFile(rootAdmin);
+        } catch(e) {}
+    }
+    if (fs.existsSync(pubAdmin)) {
+        try {
+            const pubContent = fs.readFileSync(pubAdmin, 'utf8');
+            if (pubContent.includes('Aktif Randevu Sistemleri')) return res.sendFile(pubAdmin);
+        } catch(e) {}
+    }
+    res.sendFile(pubAdmin);
+});
+
+app.get(['/js/admin.js', '/admin.js'], (req, res) => {
+    const rootJs = path.join(__dirname, 'admin.js');
+    const pubJs = path.join(__dirname, 'public', 'js', 'admin.js');
+    if (fs.existsSync(rootJs)) {
+        try {
+            const rootContent = fs.readFileSync(rootJs, 'utf8');
+            if (rootContent.includes('loadAdminAppointments')) return res.sendFile(rootJs);
+        } catch(e) {}
+    }
+    if (fs.existsSync(pubJs)) {
+        try {
+            const pubContent = fs.readFileSync(pubJs, 'utf8');
+            if (pubContent.includes('loadAdminAppointments')) return res.sendFile(pubJs);
+        } catch(e) {}
+    }
+    res.sendFile(pubJs);
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Load stored Telegram Chat IDs permanently
