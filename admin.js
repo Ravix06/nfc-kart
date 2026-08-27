@@ -520,6 +520,15 @@ async function handleFastWizardSubmit(e) {
     }
 }
 
+function toggleAdminAppointmentFields() {
+    const isChecked = document.getElementById('form-has-appointment')?.checked || false;
+    const container = document.getElementById('admin-app-fields');
+    if (container) {
+        if (isChecked) container.classList.remove('hidden');
+        else container.classList.add('hidden');
+    }
+}
+
 /* Detaylı Profil Ekle / Düzenle */
 function openNewProfileModal() {
     document.getElementById('modal-title').innerText = 'Yeni Kart Profili Oluştur';
@@ -528,6 +537,16 @@ function openNewProfileModal() {
     document.getElementById('form-id').disabled = false;
     document.getElementById('form-links-container').innerHTML = '';
     document.getElementById('form-ibans-container').innerHTML = '';
+
+    const hasAppCheckbox = document.getElementById('form-has-appointment');
+    if (hasAppCheckbox) {
+        hasAppCheckbox.checked = false;
+        toggleAdminAppointmentFields();
+    }
+    const bizNameEl = document.getElementById('form-app-biz-name');
+    if (bizNameEl) bizNameEl.value = '';
+    const bizPassEl = document.getElementById('form-app-password');
+    if (bizPassEl) bizPassEl.value = '';
     
     addLinkRow('Instagram', 'https://instagram.com/', 'instagram');
     addLinkRow('Google Yorum Yap', 'https://maps.google.com', 'google');
@@ -552,6 +571,16 @@ function editProfile(id) {
     document.getElementById('form-avatar').value = p.avatar || '';
     document.getElementById('form-banner').value = p.banner || '';
     document.getElementById('form-bio').value = p.bio || '';
+
+    const hasAppCheckbox = document.getElementById('form-has-appointment');
+    if (hasAppCheckbox) {
+        hasAppCheckbox.checked = p.hasAppointmentSystem === true;
+        toggleAdminAppointmentFields();
+    }
+    const bizNameEl = document.getElementById('form-app-biz-name');
+    if (bizNameEl) bizNameEl.value = p.appointmentBusinessName || p.company || p.name || '';
+    const bizPassEl = document.getElementById('form-app-password');
+    if (bizPassEl) bizPassEl.value = p.appointmentPassword || '';
 
     const linksContainer = document.getElementById('form-links-container');
     linksContainer.innerHTML = '';
@@ -578,22 +607,19 @@ function addLinkRow(title = '', url = '', icon = 'globe') {
     row.className = "flex items-center space-x-2 link-row bg-slate-950 p-2.5 rounded-xl border border-slate-800";
     row.innerHTML = `
         <select class="link-icon bg-slate-900 border border-slate-800 text-xs text-white rounded-lg px-2 py-2 focus:outline-none">
+            <option value="globe" ${icon === 'globe' ? 'selected' : ''}>🌐 Web</option>
             <option value="instagram" ${icon === 'instagram' ? 'selected' : ''}>📷 Instagram</option>
             <option value="google" ${icon === 'google' ? 'selected' : ''}>⭐ Google Yorum</option>
             <option value="whatsapp" ${icon === 'whatsapp' ? 'selected' : ''}>💬 WhatsApp</option>
+            <option value="phone" ${icon === 'phone' ? 'selected' : ''}>📞 Telefon</option>
+            <option value="email" ${icon === 'email' ? 'selected' : ''}>✉️ E-posta</option>
+            <option value="map" ${icon === 'map' ? 'selected' : ''}>📍 Konum/Harita</option>
             <option value="linkedin" ${icon === 'linkedin' ? 'selected' : ''}>💼 LinkedIn</option>
-            <option value="facebook" ${icon === 'facebook' ? 'selected' : ''}>📘 Facebook</option>
             <option value="youtube" ${icon === 'youtube' ? 'selected' : ''}>▶️ YouTube</option>
-            <option value="twitter" ${icon === 'twitter' ? 'selected' : ''}>❌ Twitter/X</option>
-            <option value="tiktok" ${icon === 'tiktok' ? 'selected' : ''}>🎵 TikTok</option>
-            <option value="globe" ${icon === 'globe' ? 'selected' : ''}>🌐 Web Sitesi</option>
-            <option value="map" ${icon === 'map' ? 'selected' : ''}>📍 Harita</option>
         </select>
-        <input type="text" placeholder="Başlık (Örn: Instagram)" value="${title}" class="link-title bg-slate-900 border border-slate-800 text-xs text-white rounded-lg px-3 py-2 w-1/3 focus:outline-none">
-        <input type="text" placeholder="URL (https://...)" value="${url}" class="link-url bg-slate-900 border border-slate-800 text-xs text-white rounded-lg px-3 py-2 w-full focus:outline-none">
-        <button type="button" onclick="this.parentElement.remove()" class="text-slate-500 hover:text-rose-400 px-2 py-1">
-            <i class="fa-solid fa-trash text-xs"></i>
-        </button>
+        <input type="text" placeholder="Başlık" value="${title}" class="link-title bg-slate-900 border border-slate-800 text-xs text-white rounded-lg px-3 py-2 w-1/3 focus:outline-none focus:border-indigo-500">
+        <input type="url" placeholder="https://..." value="${url}" class="link-url bg-slate-900 border border-slate-800 text-xs font-mono text-emerald-400 rounded-lg px-3 py-2 flex-grow focus:outline-none focus:border-indigo-500">
+        <button type="button" onclick="this.parentElement.remove()" class="text-slate-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
     `;
     container.appendChild(row);
 }
@@ -601,16 +627,12 @@ function addLinkRow(title = '', url = '', icon = 'globe') {
 function addIbanRow(bank = '', name = '', iban = '') {
     const container = document.getElementById('form-ibans-container');
     const row = document.createElement('div');
-    row.className = "grid grid-cols-1 sm:grid-cols-3 gap-2 iban-row bg-slate-950 p-2.5 rounded-xl border border-slate-800 relative group";
+    row.className = "flex items-center space-x-2 iban-row bg-slate-950 p-2.5 rounded-xl border border-slate-800";
     row.innerHTML = `
-        <input type="text" placeholder="Banka Adı" value="${bank}" class="iban-bank bg-slate-900 border border-slate-800 text-xs text-white rounded-lg px-3 py-2 focus:outline-none">
-        <input type="text" placeholder="Hesap Sahibi" value="${name}" class="iban-name bg-slate-900 border border-slate-800 text-xs text-white rounded-lg px-3 py-2 focus:outline-none">
-        <div class="flex items-center space-x-1">
-            <input type="text" placeholder="TR00 0000..." value="${iban}" class="iban-number bg-slate-900 border border-slate-800 text-xs text-white font-mono rounded-lg px-3 py-2 w-full focus:outline-none">
-            <button type="button" onclick="this.closest('.iban-row').remove()" class="text-slate-500 hover:text-rose-400 px-2 py-1">
-                <i class="fa-solid fa-trash text-xs"></i>
-            </button>
-        </div>
+        <input type="text" placeholder="Banka Adı" value="${bank}" class="iban-bank bg-slate-900 border border-slate-800 text-xs text-white rounded-lg px-3 py-2 w-1/4 focus:outline-none focus:border-indigo-500">
+        <input type="text" placeholder="Hesap Sahibi" value="${name}" class="iban-name bg-slate-900 border border-slate-800 text-xs text-white rounded-lg px-3 py-2 w-1/4 focus:outline-none focus:border-indigo-500">
+        <input type="text" placeholder="TR..." value="${iban}" class="iban-number bg-slate-900 border border-slate-800 text-xs font-mono text-amber-400 rounded-lg px-3 py-2 flex-grow focus:outline-none focus:border-indigo-500">
+        <button type="button" onclick="this.parentElement.remove()" class="text-slate-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
     `;
     container.appendChild(row);
 }
@@ -641,6 +663,8 @@ async function handleProfileSubmit(e) {
         }
     });
 
+    const hasAppSys = document.getElementById('form-has-appointment')?.checked || false;
+
     const payload = {
         id: document.getElementById('form-id').value.trim(),
         name: document.getElementById('form-name').value.trim(),
@@ -652,6 +676,9 @@ async function handleProfileSubmit(e) {
         avatar: document.getElementById('form-avatar').value.trim(),
         banner: document.getElementById('form-banner').value.trim(),
         bio: document.getElementById('form-bio').value.trim(),
+        hasAppointmentSystem: hasAppSys,
+        appointmentBusinessName: document.getElementById('form-app-biz-name')?.value.trim() || document.getElementById('form-company').value.trim() || document.getElementById('form-name').value.trim(),
+        appointmentPassword: document.getElementById('form-app-password')?.value.trim() || '123456',
         links,
         ibans
     };

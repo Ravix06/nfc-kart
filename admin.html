@@ -270,6 +270,28 @@
                     </div>
                 </div>
 
+                <!-- Randevu Sistemi Yetkilendirme & Şifre Yönetimi -->
+                <div class="p-4 rounded-2xl bg-slate-950 border border-emerald-500/30 space-y-3">
+                    <label class="flex items-center space-x-3 cursor-pointer select-none">
+                        <input type="checkbox" id="form-has-appointment" onchange="toggleAdminAppointmentFields()" class="w-5 h-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500">
+                        <div>
+                            <span class="text-sm font-extrabold text-white">📅 Online Randevu Sistemini Aktif Et</span>
+                            <p class="text-xs text-slate-400">Bu profilde randevu butonunu aktif eder ve işletmeye özel randevu hesabı tanımlar.</p>
+                        </div>
+                    </label>
+
+                    <div id="admin-app-fields" class="hidden pt-3 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">İşletme / Ünvan Adı</label>
+                            <input type="text" id="form-app-biz-name" placeholder="Örn: Yalçın Erkek Kuaförü" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">İşletme Paneli Giriş Şifresi</label>
+                            <input type="text" id="form-app-password" placeholder="Örn: Berber.123" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Profil Fotoğrafı (URL)</label>

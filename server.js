@@ -683,6 +683,8 @@ app.post('/api/profiles', requireAdminAuth, (req, res) => {
         counter++;
     }
 
+    const hasApp = req.body.hasAppointmentSystem === true || req.body.hasAppointmentSystem === 'true';
+
     const newProfile = {
         id: finalId,
         name: name || '',
@@ -697,9 +699,30 @@ app.post('/api/profiles', requireAdminAuth, (req, res) => {
         theme: theme || 'dark',
         links: Array.isArray(links) ? links : [],
         ibans: Array.isArray(ibans) ? ibans : [],
+        hasAppointmentSystem: hasApp,
+        appointmentPassword: req.body.appointmentPassword || '123456',
         views: 0,
         createdAt: new Date().toISOString()
     };
+
+    if (hasApp) {
+        const accs = getBusinessAccounts();
+        const bName = req.body.appointmentBusinessName || newProfile.company || newProfile.name;
+        const bPass = req.body.appointmentPassword || '123456';
+        const existingIdx = accs.findIndex(a => a.profileId === finalId || (a.businessName && a.businessName.toLowerCase() === bName.toLowerCase()));
+        const accData = {
+            id: `acc-${Date.now().toString().slice(-4)}`,
+            profileId: finalId,
+            businessName: bName,
+            password: bPass,
+            phone: newProfile.phone,
+            hasAppointmentSystem: true,
+            createdAt: new Date().toISOString()
+        };
+        if (existingIdx !== -1) accs[existingIdx] = { ...accs[existingIdx], ...accData };
+        else accs.push(accData);
+        saveBusinessAccounts(accs);
+    }
 
     profiles.push(newProfile);
     saveProfiles(profiles);
@@ -711,8 +734,35 @@ app.put('/api/profiles/:id', requireAdminAuth, (req, res) => {
     const index = profiles.findIndex(p => p.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: 'Profil bulunamadı' });
 
-    const updatedProfile = { ...profiles[index], ...req.body, id: profiles[index].id };
+    const hasApp = req.body.hasAppointmentSystem === true || req.body.hasAppointmentSystem === 'true';
+
+    const updatedProfile = { 
+        ...profiles[index], 
+        ...req.body, 
+        id: profiles[index].id,
+        hasAppointmentSystem: hasApp
+    };
     profiles[index] = updatedProfile;
+
+    if (hasApp || req.body.appointmentPassword) {
+        const accs = getBusinessAccounts();
+        const bName = req.body.appointmentBusinessName || updatedProfile.company || updatedProfile.name;
+        const bPass = req.body.appointmentPassword || updatedProfile.appointmentPassword || '123456';
+        const existingIdx = accs.findIndex(a => a.profileId === profiles[index].id || (a.businessName && a.businessName.toLowerCase() === bName.toLowerCase()));
+        const accData = {
+            id: `acc-${Date.now().toString().slice(-4)}`,
+            profileId: profiles[index].id,
+            businessName: bName,
+            password: bPass,
+            phone: updatedProfile.phone,
+            hasAppointmentSystem: true,
+            createdAt: new Date().toISOString()
+        };
+        if (existingIdx !== -1) accs[existingIdx] = { ...accs[existingIdx], ...accData };
+        else accs.push(accData);
+        saveBusinessAccounts(accs);
+    }
+
     saveProfiles(profiles);
     res.json(updatedProfile);
 });
