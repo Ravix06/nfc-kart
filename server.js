@@ -943,6 +943,36 @@ app.get('/p/:id', (req, res) => {
     res.sendFile(pubProf);
 });
 
+app.get('/js/admin.js', (req, res) => {
+    const rootJs = path.join(__dirname, 'admin.js');
+    const pubJs = path.join(__dirname, 'public', 'js', 'admin.js');
+    if (fs.existsSync(rootJs)) {
+        try {
+            const rootContent = fs.readFileSync(rootJs, 'utf8');
+            if (rootContent.includes('loadAdminAppointments')) return res.sendFile(rootJs);
+        } catch(e) {}
+    }
+    if (fs.existsSync(pubJs)) {
+        try {
+            const pubContent = fs.readFileSync(pubJs, 'utf8');
+            if (pubContent.includes('loadAdminAppointments')) return res.sendFile(pubJs);
+        } catch(e) {}
+    }
+    res.sendFile(pubJs);
+});
+
+app.get('/admin.js', (req, res) => {
+    const rootJs = path.join(__dirname, 'admin.js');
+    const pubJs = path.join(__dirname, 'public', 'js', 'admin.js');
+    if (fs.existsSync(rootJs)) {
+        try {
+            const rootContent = fs.readFileSync(rootJs, 'utf8');
+            if (rootContent.includes('loadAdminAppointments')) return res.sendFile(rootJs);
+        } catch(e) {}
+    }
+    res.sendFile(pubJs);
+});
+
 app.get('/admin', (req, res) => {
     const rootAdmin = path.join(__dirname, 'admin.html');
     const pubAdmin = path.join(__dirname, 'public', 'admin.html');
