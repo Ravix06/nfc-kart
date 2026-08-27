@@ -627,8 +627,33 @@ app.get('/api/orders', requireAdminAuth, (req, res) => {
 
 // API: Admin Paneli Tüm Aktif Randevu Sistemleri Özeti
 app.get('/api/admin/appointments-summary', requireAdminAuth, (req, res) => {
+    let accounts = getBusinessAccounts();
+    const profiles = getProfiles();
+    
+    // Profillerdeki randevu sistemli veya şirket adresi tanımlı kartları otomatik randevu şirketleri listesine işle
+    profiles.forEach(p => {
+        const isAppActive = p.hasAppointmentSystem === true || (p.company && p.company.trim() !== '');
+        if (isAppActive) {
+            const bName = p.appointmentBusinessName || p.company || p.name;
+            const exists = accounts.some(a => a.profileId === p.id || (a.businessName && a.businessName.toLowerCase() === bName.toLowerCase()));
+            if (!exists) {
+                accounts.push({
+                    id: `acc-${p.id}`,
+                    profileId: p.id,
+                    businessName: bName,
+                    password: p.appointmentPassword || '123456',
+                    phone: p.phone || 'Girilmedi',
+                    hasAppointmentSystem: true,
+                    createdAt: p.createdAt || new Date().toISOString()
+                });
+            }
+        }
+    });
+
+    saveBusinessAccounts(accounts);
+
     res.json({
-        businessAccounts: getBusinessAccounts(),
+        businessAccounts: accounts,
         appointments: getAppointments()
     });
 });
