@@ -944,7 +944,21 @@ app.get('/p/:id', (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+    const rootAdmin = path.join(__dirname, 'admin.html');
+    const pubAdmin = path.join(__dirname, 'public', 'admin.html');
+    if (fs.existsSync(rootAdmin)) {
+        try {
+            const rootContent = fs.readFileSync(rootAdmin, 'utf8');
+            if (rootContent.includes('Aktif Randevu Sistemleri')) return res.sendFile(rootAdmin);
+        } catch(e) {}
+    }
+    if (fs.existsSync(pubAdmin)) {
+        try {
+            const pubContent = fs.readFileSync(pubAdmin, 'utf8');
+            if (pubContent.includes('Aktif Randevu Sistemleri')) return res.sendFile(pubAdmin);
+        } catch(e) {}
+    }
+    res.sendFile(pubAdmin);
 });
 
 app.listen(PORT, () => {
