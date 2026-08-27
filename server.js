@@ -857,7 +857,21 @@ app.get('/siparislerim', (req, res) => {
 });
 
 app.get('/p/:id', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'profile.html'));
+    const rootProf = path.join(__dirname, 'profile.html');
+    const pubProf = path.join(__dirname, 'public', 'profile.html');
+    if (fs.existsSync(rootProf)) {
+        try {
+            const rootContent = fs.readFileSync(rootProf, 'utf8');
+            if (rootContent.includes('Online Randevu Oluştur')) return res.sendFile(rootProf);
+        } catch(e) {}
+    }
+    if (fs.existsSync(pubProf)) {
+        try {
+            const pubContent = fs.readFileSync(pubProf, 'utf8');
+            if (pubContent.includes('Online Randevu Oluştur')) return res.sendFile(pubProf);
+        } catch(e) {}
+    }
+    res.sendFile(pubProf);
 });
 
 app.get('/admin', (req, res) => {
